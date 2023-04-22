@@ -12,6 +12,10 @@ int main() {
 		"option 3",
 		"option 4",
 		"option 5",
+		"option 6",
+		"option 7",
+		"option 8",
+		"option 9",
 		0
 	};
 
@@ -20,28 +24,29 @@ int main() {
 	while(*p++) {
 		++num_options;
 	}
+
 	int selected_index = MakeSelection(options, num_options, "options");
 	if(selected_index == -1) {
 		return 0;
 	}
 
-	char* things[] = {
-		"thing 1",
-		"thing 2",
-		"thing 3",
-		"thing 4",
-		"thing 5",
-		0
-	};
-	int num_things = 0;
-	p = things;
-	while(*p++) {
-		++num_things;
-	}
-	selected_index = MakeSelection(things, num_things, "things");
-	if(selected_index == -1) {
-		return 0;
-	}
+	// char* things[] = {
+	// 	"thing 1",
+	// 	"thing 2",
+	// 	"thing 3",
+	// 	"thing 4",
+	// 	"thing 5",
+	// 	0
+	// };
+	// int num_things = 0;
+	// p = things;
+	// while(*p++) {
+	// 	++num_things;
+	// }
+	// selected_index = MakeSelection(things, num_things, "things");
+	// if(selected_index == -1) {
+	// 	return 0;
+	// }
 
 	return 0;
 }
