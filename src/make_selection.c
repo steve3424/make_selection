@@ -30,8 +30,10 @@ static void PrintOptions(char** options, int selection, DisplayWindow window, ch
 	printf(YELLOW_FG "Enter: Select, Ctl+C: Cancel" RESET "\n");
 }
 
-static void ResetCursor(DisplayWindow window) {
-	printf("\033[%dF\r", window.bottom - window.top + 2);
+static void ResetWindow(DisplayWindow window) {
+	int lines_to_clear = window.bottom - window.top + 2;
+	printf("\033[%dF\r", lines_to_clear);
+	printf("\033[%dM\r", lines_to_clear);
 }
 
 static void ClearWindow(DisplayWindow window) {
@@ -108,7 +110,7 @@ int MakeSelection(char** options, int num_options, char* label) {
 			}
 		}
 
-		ResetCursor(window);
+		ResetWindow(window);
 	}
 	return 0;
 }
