@@ -61,9 +61,17 @@ int MakeSelection(char** options, int num_options, char* label) {
 	window.top = 0;
 	window.bottom = (num_options > max_window_size) ? max_window_size : num_options;
 
+	// Draw once outside the loop so we don't call ResetWindow before drawing
+	// Also, only clear and redraw when selection changes
+	int something_changed = 0;
 	int selection = 0;
+	PrintOptions(options, selection, window, label);
 	while(1) {
-		PrintOptions(options, selection, window, label);
+		if(something_changed) {
+			ResetWindow(window);
+			PrintOptions(options, selection, window, label);
+			something_changed = 0;
+		}
 
 		INPUT_RECORD ipr;
 		DWORD events_read;
@@ -82,6 +90,7 @@ int MakeSelection(char** options, int num_options, char* label) {
 				if(ipr.Event.KeyEvent.wVirtualKeyCode == VK_DOWN) {
 					if((selection + 1) < num_options) {
 						selection++;
+						something_changed = 1;
 					}
 
 					if(selection == window.bottom) {
@@ -92,6 +101,7 @@ int MakeSelection(char** options, int num_options, char* label) {
 				else if(ipr.Event.KeyEvent.wVirtualKeyCode == VK_UP) {
 					if((selection - 1) >= 0) {
 						selection--;
+						something_changed = 1;
 					}
 
 					if(selection < window.top) {
@@ -109,8 +119,6 @@ int MakeSelection(char** options, int num_options, char* label) {
 				}
 			}
 		}
-
-		ResetWindow(window);
 	}
 	return 0;
 }
