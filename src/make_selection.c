@@ -30,12 +30,6 @@ static void PrintOptions(char** options, int selection, DisplayWindow window, ch
 	printf(YELLOW_FG "Enter: Select, Ctl+C: Cancel" RESET "\n");
 }
 
-static void ResetWindow(DisplayWindow window) {
-	int lines_to_clear = window.bottom - window.top + 2;
-	printf("\033[%dF\r", lines_to_clear);
-	printf("\033[%dM\r", lines_to_clear);
-}
-
 static void ClearWindow(DisplayWindow window) {
 	int lines_to_clear = window.bottom - window.top + 2;
 	printf("\033[%dF\r", lines_to_clear);
@@ -61,23 +55,17 @@ int MakeSelection(char** options, int num_options, char* label) {
 	window.top = 0;
 	window.bottom = (num_options > max_window_size) ? max_window_size : num_options;
 
-	// Draw once outside the loop so we don't call ResetWindow before drawing
+	// Draw once outside the loop so we don't call ClearWindow before drawing
 	// Also, only clear and redraw when selection changes
 	int something_changed = 0;
 	int selection = 0;
 	PrintOptions(options, selection, window, label);
 	while(1) {
-		if(something_changed) {
-			ResetWindow(window);
-			PrintOptions(options, selection, window, label);
-			something_changed = 0;
-		}
-
 		INPUT_RECORD ipr;
 		DWORD events_read;
 		if(!ReadConsoleInputA(stdin_handle, &ipr, 1, &events_read)) {
 			printf("Error reading input...\n");
-			return 0;
+			return -1;
 		}
 
 		if(ipr.EventType == KEY_EVENT && ipr.Event.KeyEvent.bKeyDown) {
@@ -86,39 +74,44 @@ int MakeSelection(char** options, int num_options, char* label) {
 				printf("%s> %s\n", label, options[selection]);
 				return selection;
 			}
-			else {
-				if(ipr.Event.KeyEvent.wVirtualKeyCode == VK_DOWN) {
-					if((selection + 1) < num_options) {
-						selection++;
-						something_changed = 1;
-					}
-
-					if(selection == window.bottom) {
-						window.top++;
-						window.bottom++;
-					}
+			else if(
+				(ipr.Event.KeyEvent.dwControlKeyState == LEFT_CTRL_PRESSED || ipr.Event.KeyEvent.dwControlKeyState == RIGHT_CTRL_PRESSED) && 
+				 ipr.Event.KeyEvent.wVirtualKeyCode == 0x43
+			) {
+				ClearWindow(window);
+				printf("cancelled");
+				return -1;
+			}
+			else if(ipr.Event.KeyEvent.wVirtualKeyCode == VK_DOWN) {
+				if((selection + 1) < num_options) {
+					selection++;
+					something_changed = 1;
 				}
-				else if(ipr.Event.KeyEvent.wVirtualKeyCode == VK_UP) {
-					if((selection - 1) >= 0) {
-						selection--;
-						something_changed = 1;
-					}
 
-					if(selection < window.top) {
-						window.top--;
-						window.bottom--;
-					}
+				if(selection == window.bottom) {
+					window.top++;
+					window.bottom++;
 				}
-				else if(
-					(ipr.Event.KeyEvent.dwControlKeyState == LEFT_CTRL_PRESSED || ipr.Event.KeyEvent.dwControlKeyState == RIGHT_CTRL_PRESSED) && 
-					 ipr.Event.KeyEvent.wVirtualKeyCode == 0x43
-				) {
-					ClearWindow(window);
-					printf("cancelled");
-					return -1;
+			}
+			else if(ipr.Event.KeyEvent.wVirtualKeyCode == VK_UP) {
+				if((selection - 1) >= 0) {
+					selection--;
+					something_changed = 1;
+				}
+
+				if(selection < window.top) {
+					window.top--;
+					window.bottom--;
 				}
 			}
 		}
+
+		if(something_changed) {
+			ClearWindow(window);
+			PrintOptions(options, selection, window, label);
+			something_changed = 0;
+		}
 	}
-	return 0;
+
+	return -1;
 }
