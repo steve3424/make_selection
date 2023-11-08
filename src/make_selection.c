@@ -55,7 +55,7 @@ int MakeSelection(char** options, int num_options, char* label) {
 	window.top = 0;
 	window.bottom = (num_options > max_window_size) ? max_window_size : num_options;
 
-	// We only clear/draw options if the selection changed, so we have to draw once outside the loop
+	// NOTE: We only clear/draw options if the selection changed, so we have to draw once outside the loop
 	int something_changed = 0;
 	int selection = 0;
 	PrintOptions(options, selection, window, label);
