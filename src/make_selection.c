@@ -5,6 +5,8 @@
 #define YELLOW_FG "\033[33m"
 #define WHITE_BG "\033[30;47m"
 #define RESET "\033[0m"
+#define MOVE_UP_N_LINES "\033[%dF\r"
+#define DELETE_N_LINES "\033[%dM\r"
 
 static HANDLE stdin_handle;
 static int initialized = 0;
@@ -32,8 +34,8 @@ static void PrintOptions(char** options, int selection, DisplayWindow window, ch
 
 static void ClearWindow(DisplayWindow window) {
 	int lines_to_clear = window.bottom - window.top + 2;
-	printf("\033[%dF\r", lines_to_clear);
-	printf("\033[%dM\r", lines_to_clear);
+	printf(MOVE_UP_N_LINES, lines_to_clear);
+	printf(DELETE_N_LINES, lines_to_clear);
 }
 
 int MakeSelection(char** options, int num_options, char* label) {
