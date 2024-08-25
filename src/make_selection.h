@@ -1,1 +1,0 @@
-int MakeSelection(char** options, int num_options, char* label);
