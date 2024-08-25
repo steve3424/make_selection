@@ -3,10 +3,6 @@
   <br>
 </h1>
 
-<p align="center">
-    Interactive cli menu
-  <br>
-</p>
 
 ### Sample
 #### file.py
