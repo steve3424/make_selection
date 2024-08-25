@@ -8,7 +8,7 @@
 pip install make_selection
 ```
 
-## Sample
+## Example
 #### file.py
 ```python
 from make_selection import makeSelection
