@@ -129,7 +129,7 @@ def makeSelection(options: list[Any], label: str, window_size: int=None) -> Any:
 
     Returns
     -------
-    Selected value, not the index.
+    Selected value.
     """
     if window_size:
        return Menu(options, label, window_size).show()

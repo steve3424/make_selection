@@ -3,9 +3,13 @@
   <br>
 </h1>
 
-Utility for interactive cli menus
+<p align="center">
+    Utility for interactive cli menus
+  <br>
+</p>
 
-## file.py
+### Sample
+#### file.py
 ```python
 from make_selection import makeSelection
 
@@ -14,8 +18,8 @@ label = "choose option"
 selected = makeSelection(options, label)
 ```
 
-## output
-```sh
-user@host:~$ python file.py
-```
-![make selection sample](/images/sample.png)
+#### Show menu
+![image of cli while using the menu](/images/using_menu.png)
+
+#### After selection
+![image of cli after item is selected](/images/item_selected.png)
