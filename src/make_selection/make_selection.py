@@ -137,4 +137,4 @@ def makeSelection(options: list[Any], label: str, window_size: int=None) -> Any:
        return Menu(options, label).show()
 
 if __name__ == "__main__":
-    makeSelection([i for i in range(100)], "CHOOSE!")
+    makeSelection(["one", "two", "three"], "choose option")
