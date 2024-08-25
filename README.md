@@ -3,6 +3,11 @@
 </p>
 
 
+## Setup
+```
+pip install make_selection
+```
+
 ## Sample
 #### file.py
 ```python
