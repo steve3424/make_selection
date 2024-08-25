@@ -1,10 +1,10 @@
 <h1 align="center">
-    make_selection
+  <img src="https://raw.githubusercontent.com/steve3424/make_selection/develop/images/logo.png" alt="Make selection logo">
   <br>
 </h1>
 
 <p align="center">
-    Utility for interactive cli menus
+    Interactive cli menu
   <br>
 </p>
 
