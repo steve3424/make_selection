@@ -15,7 +15,8 @@ selected = makeSelection(options, label)
 ```
 
 #### Show menu
-![image of cli while using the menu](/images/using_menu.png)
+<img src="https://raw.githubusercontent.com/steve3424/make_selection/develop/images/using_menu.png" alt="image of cli while using the menu">
+<br>
 
 #### After selection
-![image of cli after item is selected](/images/item_selected.png)
+<img src="https://raw.githubusercontent.com/steve3424/make_selection/develop/images/item_selected.png" alt="image of cli after item is selected">
