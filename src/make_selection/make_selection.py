@@ -37,7 +37,7 @@ class Menu:
 
         self.options_original = options
         self.options_current = options
-        self.indices = []
+        self.search_indices = []
         self.search_string = ""
         self.label = label
         self.selected_index = 0
@@ -70,12 +70,17 @@ class Menu:
                             self.window_top = self.selected_index
                         elif bottom <= self.selected_index:
                             self.window_top = self.selected_index - self.window_current_size + 1
-            elif self.isAscii(char) or (char == SPACEBAR and 0 < len(self.search_string)):
-                # TODO: search string
-                pass
+            elif self.isSearchableChar(char):
+                char = chr(char)
+                self.search_string = f"{self.search_string}{char}".lstrip()
+                if self.search_string:
+                    print(char, end="", flush=True)
+                    self.search(self.options_current)
             elif char == BACKSPACE and 0 < len(self.search_string):
-                # TODO: search string
-                pass
+                self.search_string = self.search_string[:-1]
+                # Move left, print space, move left again
+                print("\x1b[1D \x1b[1D", end="", flush=True)
+                self.search(self.options_original)
             elif char == ENTER_KEY:
                 if self.options_current:
                     self.printSelected()
@@ -89,11 +94,14 @@ class Menu:
                 self.clearMenu()
                 self.printMenu()
 
-    def getChar(self):
+    def search(self, search_list: list) -> None:
+        pass
+    
+    def getChar(self) -> int:
         return ord(msvcrt.getch())
 
-    def isAscii(self, char):
-        return (33 <= char and char <= 126)
+    def isSearchableChar(self, char):
+        return (32 <= char and char <= 126)
     
     def clearMenu(self, clear_label=False):
         if clear_label:
