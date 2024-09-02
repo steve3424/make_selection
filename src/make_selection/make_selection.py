@@ -31,9 +31,8 @@ class Menu:
     def __init__(self, options: list, label: str, window_size: int=10) -> None:
         assert options
         assert label
-        assert 1 < window_size
-        if len(options) < window_size:
-            window_size = len(options)
+        assert 1 <= window_size
+        window_size = min((len(options)), window_size)
 
         self.options_original = options
         self.options_current = options
