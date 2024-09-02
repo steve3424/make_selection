@@ -75,11 +75,13 @@ class Menu:
                 if self.search_string:
                     print(char, end="", flush=True)
                     self.search(self.options_current)
+                    something_changed = True
             elif char == BACKSPACE and 0 < len(self.search_string):
                 self.search_string = self.search_string[:-1]
                 # Move left, print space, move left again
                 print("\x1b[1D \x1b[1D", end="", flush=True)
                 self.search(self.options_original)
+                something_changed = True
             elif char == ENTER_KEY:
                 if self.options_current:
                     self.printSelected()
@@ -94,7 +96,20 @@ class Menu:
                 self.printMenu()
 
     def search(self, search_list: list) -> None:
-        pass
+        found_indices = []
+        found_options = []
+        for o in search_list:
+            found_i = str(o).lower().find(self.search_string.lower())
+            if found_i != -1:
+                found_indices.append(found_i)
+                found_options.append(o)
+        self.options_current = found_options
+        self.search_indices = found_indices
+
+        # Reset window after modifying options
+        self.window_top = 0
+        self.selected_index = 0
+        self.window_size_current = min((len(self.options_current), self.window_size_original))
     
     def getChar(self) -> int:
         return ord(msvcrt.getch())
