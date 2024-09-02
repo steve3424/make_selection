@@ -41,8 +41,8 @@ class Menu:
         self.label = label
         self.selected_index = 0
         self.window_top = 0
-        self.window_original_size = window_size
-        self.window_current_size = window_size
+        self.window_size_original = window_size
+        self.window_size_current = window_size
         self.help_string = "Enter: Select, Ctl+C: Cancel"
 
     def show(self):
@@ -64,11 +64,11 @@ class Menu:
                 
                     # Update window
                     if something_changed:
-                        bottom = self.window_top + self.window_current_size
+                        bottom = self.window_top + self.window_size_current
                         if self.selected_index < self.window_top:
                             self.window_top = self.selected_index
                         elif bottom <= self.selected_index:
-                            self.window_top = self.selected_index - self.window_current_size + 1
+                            self.window_top = self.selected_index - self.window_size_current + 1
             elif self.isSearchableChar(char):
                 char = chr(char)
                 self.search_string = f"{self.search_string}{char}".lstrip()
@@ -109,13 +109,13 @@ class Menu:
             print("\x1b[J")
 
     def printMenu(self):
-        bottom = self.window_top + self.window_current_size
+        bottom = self.window_top + self.window_size_current
         for i in range(self.window_top, bottom):
             if i == self.selected_index:
                 print(f"{ANSI_HIGHLIGHT}{self.options_current[i]}{ANSI_RESET}")
             else:
                 print(self.options_current[i])
-        print(f"{ANSI_YELLOW}{self.help_string}{ANSI_RESET}\n{ANSI_MOVE_CURSOR.format(up=self.window_current_size + 2, right=len(self.label) + len(self.search_string) + 1)}", end="", flush=True)
+        print(f"{ANSI_YELLOW}{self.help_string}{ANSI_RESET}\n{ANSI_MOVE_CURSOR.format(up=self.window_size_current + 2, right=len(self.label) + len(self.search_string) + 1)}", end="", flush=True)
 
     def printSelected(self):
         self.clearMenu(clear_label=True)
