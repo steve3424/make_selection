@@ -124,11 +124,17 @@ class Menu:
 
     def printMenu(self):
         bottom = self.window_top + self.window_size_current
-        for i in range(self.window_top, bottom):
-            if i == self.selected_index:
-                print(f"{ANSI_HIGHLIGHT}{self.options_current[i]}{ANSI_RESET}")
-            else:
-                print(self.options_current[i])
+        if not self.options_current:
+            print(f"{ANSI_BLUE}no matches found{ANSI_RESET}")
+            # NOTE: window size is 0 here after empty search, but we are printing 1 line
+            #       so we need to set it so the footer prints correctly
+            self.window_size_current = 1
+        else:
+            for i in range(self.window_top, bottom):
+                if i == self.selected_index:
+                    print(f"{ANSI_HIGHLIGHT}{self.options_current[i]}{ANSI_RESET}")
+                else:
+                    print(self.options_current[i])
         print(f"{ANSI_YELLOW}{self.help_string}{ANSI_RESET}\n{ANSI_MOVE_CURSOR.format(up=self.window_size_current + 2, right=len(self.label) + len(self.search_string) + 1)}", end="", flush=True)
 
     def printSelected(self):
