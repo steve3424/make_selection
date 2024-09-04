@@ -1,6 +1,6 @@
 [project]
 name = "make_selection"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
   { name="Steven Frazee", email="stevefrazee123@gmail.com" },
 ]
