@@ -2,6 +2,10 @@
 Module for interactive command line menu. Simply accepts a list of str-able objects
 and allows user to select using arrow keys.
 """
+# TODO: color substrings
+# TODO: if ctrl-v, get all chars instead of 1 at a time
+# TODO: max window
+# TODO: use stringio for print menu
 import sys
 if sys.platform != "win32":
     raise NotImplementedError("This module is only available on Windows.")
