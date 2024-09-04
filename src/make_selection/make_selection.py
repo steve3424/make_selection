@@ -82,10 +82,9 @@ class Menu:
                 print("\x1b[1D \x1b[1D", end="", flush=True)
                 self.search(self.options_original)
                 something_changed = True
-            elif char == ENTER_KEY:
-                if self.options_current:
-                    self.printSelected()
-                    return self.options_original[self.selected_index]
+            elif char == ENTER_KEY and self.options_current:
+                self.printSelected()
+                return self.options_current[self.selected_index]
             elif char == CTL_C:
                 self.clearMenu(clear_label=True)
                 print("cancelled")
