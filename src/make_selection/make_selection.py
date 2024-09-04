@@ -158,4 +158,4 @@ def makeSelection(options: list[Any], label: str, window_size: int=None) -> Any:
        return Menu(options, label).show()
 
 if __name__ == "__main__":
-    makeSelection(["interactive", "cli", "menu"], "make_selection")
+    print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection')}'")
