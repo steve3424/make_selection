@@ -31,19 +31,18 @@ class Menu:
     def __init__(self, options: list, label: str, window_size: int=10) -> None:
         assert options
         assert label
-        assert 1 < window_size
-        if len(options) < window_size:
-            window_size = len(options)
+        assert 1 <= window_size
+        window_size = min((len(options)), window_size)
 
         self.options_original = options
         self.options_current = options
-        self.indices = []
+        self.search_indices = []
         self.search_string = ""
         self.label = label
         self.selected_index = 0
         self.window_top = 0
-        self.window_original_size = window_size
-        self.window_current_size = window_size
+        self.window_size_original = window_size
+        self.window_size_current = window_size
         self.help_string = "Enter: Select, Ctl+C: Cancel"
 
     def show(self):
@@ -65,21 +64,27 @@ class Menu:
                 
                     # Update window
                     if something_changed:
-                        bottom = self.window_top + self.window_current_size
+                        bottom = self.window_top + self.window_size_current
                         if self.selected_index < self.window_top:
                             self.window_top = self.selected_index
                         elif bottom <= self.selected_index:
-                            self.window_top = self.selected_index - self.window_current_size + 1
-            elif self.isAscii(char) or (char == SPACEBAR and 0 < len(self.search_string)):
-                # TODO: search string
-                pass
+                            self.window_top = self.selected_index - self.window_size_current + 1
+            elif self.isSearchableChar(char):
+                char = chr(char)
+                self.search_string = f"{self.search_string}{char}".lstrip()
+                if self.search_string:
+                    print(char, end="", flush=True)
+                    self.search(self.options_current)
+                    something_changed = True
             elif char == BACKSPACE and 0 < len(self.search_string):
-                # TODO: search string
-                pass
-            elif char == ENTER_KEY:
-                if self.options_current:
-                    self.printSelected()
-                    return self.options_original[self.selected_index]
+                self.search_string = self.search_string[:-1]
+                # Move left, print space, move left again
+                print("\x1b[1D \x1b[1D", end="", flush=True)
+                self.search(self.options_original)
+                something_changed = True
+            elif char == ENTER_KEY and self.options_current:
+                self.printSelected()
+                return self.options_current[self.selected_index]
             elif char == CTL_C:
                 self.clearMenu(clear_label=True)
                 print("cancelled")
@@ -89,11 +94,27 @@ class Menu:
                 self.clearMenu()
                 self.printMenu()
 
-    def getChar(self):
+    def search(self, search_list: list) -> None:
+        found_indices = []
+        found_options = []
+        for o in search_list:
+            found_i = str(o).lower().find(self.search_string.lower())
+            if found_i != -1:
+                found_indices.append(found_i)
+                found_options.append(o)
+        self.options_current = found_options
+        self.search_indices = found_indices
+
+        # Reset window after modifying options
+        self.window_top = 0
+        self.selected_index = 0
+        self.window_size_current = min((len(self.options_current), self.window_size_original))
+    
+    def getChar(self) -> int:
         return ord(msvcrt.getch())
 
-    def isAscii(self, char):
-        return (33 <= char and char <= 126)
+    def isSearchableChar(self, char):
+        return (32 <= char and char <= 126)
     
     def clearMenu(self, clear_label=False):
         if clear_label:
@@ -102,13 +123,19 @@ class Menu:
             print("\x1b[J")
 
     def printMenu(self):
-        bottom = self.window_top + self.window_current_size
-        for i in range(self.window_top, bottom):
-            if i == self.selected_index:
-                print(f"{ANSI_HIGHLIGHT}{self.options_current[i]}{ANSI_RESET}")
-            else:
-                print(self.options_current[i])
-        print(f"{ANSI_YELLOW}{self.help_string}{ANSI_RESET}\n{ANSI_MOVE_CURSOR.format(up=self.window_current_size + 2, right=len(self.label) + len(self.search_string) + 1)}", end="", flush=True)
+        bottom = self.window_top + self.window_size_current
+        if not self.options_current:
+            print(f"{ANSI_BLUE}no matches found{ANSI_RESET}")
+            # NOTE: window size is 0 here after empty search, but we are printing 1 line
+            #       so we need to set it so the footer prints correctly
+            self.window_size_current = 1
+        else:
+            for i in range(self.window_top, bottom):
+                if i == self.selected_index:
+                    print(f"{ANSI_HIGHLIGHT}{self.options_current[i]}{ANSI_RESET}")
+                else:
+                    print(self.options_current[i])
+        print(f"{ANSI_YELLOW}{self.help_string}{ANSI_RESET}\n{ANSI_MOVE_CURSOR.format(up=self.window_size_current + 2, right=len(self.label) + len(self.search_string) + 1)}", end="", flush=True)
 
     def printSelected(self):
         self.clearMenu(clear_label=True)
@@ -137,4 +164,4 @@ def makeSelection(options: list[Any], label: str, window_size: int=None) -> Any:
        return Menu(options, label).show()
 
 if __name__ == "__main__":
-    makeSelection(["interactive", "cli", "menu"], "make_selection")
+    print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection')}'")
