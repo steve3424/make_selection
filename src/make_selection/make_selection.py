@@ -14,11 +14,14 @@ enable_ansi_codes = 7
 kernel32 = ctypes.windll.kernel32
 kernel32.SetConsoleMode(kernel32.GetStdHandle(stdout), enable_ansi_codes)
 
-ANSI_MOVE_CURSOR = "\x1b[{up}F\r\x1b[{right}C"
-ANSI_HIGHLIGHT   = "\x1b[30;47m"
-ANSI_YELLOW      = "\x1b[93m"
-ANSI_BLUE        = "\x1b[94m"
-ANSI_RESET       = "\x1b[0m"
+ANSI_MOVE_CURSOR             = "\x1b[{up}F\r\x1b[{right}C"
+ANSI_HIGHLIGHT               = "\x1b[30;47m"
+ANSI_HIGHLIGHT_SEARCH_STRING = "\x1b[95;47m"
+ANSI_YELLOW                  = "\x1b[93m"
+ANSI_BLUE                    = "\x1b[94m"
+ANSI_MAGENTA                 = "\x1b[95m"
+ANSI_RESET                   = "\x1b[0m"
+
 SPECIAL_KEY = 224
 UP_ARROW    = 72
 DOWN_ARROW  = 80
@@ -131,10 +134,20 @@ class Menu:
             self.window_size_current = 1
         else:
             for i in range(self.window_top, bottom):
-                if i == self.selected_index:
-                    print(f"{ANSI_HIGHLIGHT}{self.options_current[i]}{ANSI_RESET}")
-                else:
-                    print(self.options_current[i])
+                option_to_print = str(self.options_current[i])
+                if self.search_indices:
+                    highlight_beg = self.search_indices[i]
+                    highlight_end = highlight_beg + len(self.search_string)
+                    opt_beg = option_to_print[0 : highlight_beg]
+                    opt_mid = option_to_print[highlight_beg : highlight_end]
+                    opt_end = option_to_print[highlight_end :]
+                    if i == self.selected_index:
+                        option_to_print = f"{ANSI_HIGHLIGHT}{opt_beg}{ANSI_HIGHLIGHT_SEARCH_STRING}{opt_mid}{ANSI_HIGHLIGHT}{opt_end}{ANSI_RESET}"
+                    else:
+                        option_to_print = f"{opt_beg}{ANSI_MAGENTA}{opt_mid}{ANSI_RESET}{opt_end}"
+                elif i == self.selected_index:
+                    option_to_print = f"{ANSI_HIGHLIGHT}{option_to_print}{ANSI_RESET}"
+                print(option_to_print)
         print(f"{ANSI_YELLOW}{self.help_string}{ANSI_RESET}\n{ANSI_MOVE_CURSOR.format(up=self.window_size_current + 2, right=len(self.label) + len(self.search_string) + 1)}", end="", flush=True)
 
     def printSelected(self):
