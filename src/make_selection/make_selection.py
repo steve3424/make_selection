@@ -2,6 +2,13 @@
 Module for interactive command line menu. Simply accepts a list of str-able objects
 and allows user to select using arrow keys.
 """
+# TODO: work on linux
+# TODO: enter will add selection to list
+#       remove from current list and original list
+#       keep current search alive
+# TODO: key command to remove from list ?
+# TODO: how to print with list addition/removal
+# TODO: key command to finish
 import sys
 if sys.platform != "win32":
     raise NotImplementedError("This module is only available on Windows.")
