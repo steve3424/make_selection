@@ -58,7 +58,6 @@ class Menu:
         self.help_string = "Enter: Select, Ctl+C: Cancel"
 
     def show(self):
-        print(f"{ANSI_BLUE}{self.label}>{ANSI_RESET}")
         self.printMenu()
         while True:
             something_changed = False
@@ -102,7 +101,7 @@ class Menu:
                 else:
                     return selected_item
             elif char == CTL_C:
-                self.clearMenu(clear_label=True)
+                self.clearMenu()
                 print("cancelled")
                 return None
 
@@ -132,13 +131,11 @@ class Menu:
     def isSearchableChar(self, char):
         return (32 <= char and char <= 126)
     
-    def clearMenu(self, clear_label=False):
-        if clear_label:
-            print("\x1b[0G\x1b[J", end="", flush=True)
-        else:
-            print("\x1b[J")
+    def clearMenu(self):
+        print("\x1b[0G\x1b[J", end="", flush=True)
 
     def printMenu(self):
+        print(f"{ANSI_BLUE}{self.label}>{ANSI_RESET}{self.search_string}")
         bottom = self.window_top + self.window_size_current
         if not self.options_current:
             print(f"{ANSI_BLUE}no matches found{ANSI_RESET}")
@@ -164,7 +161,7 @@ class Menu:
         print(f"{ANSI_YELLOW}{self.help_string}{ANSI_RESET}\n{ANSI_MOVE_CURSOR.format(up=self.window_size_current + 2, right=len(self.label) + len(self.search_string) + 1)}", end="", flush=True)
 
     def printSelected(self):
-        self.clearMenu(clear_label=True)
+        self.clearMenu()
         print(f"{self.label}> {self.options_current[self.selected_index]}")
 
 def makeSelection(options: list[Any], label: str, window_size: int=None, select_multiple: bool=False) -> Any:
