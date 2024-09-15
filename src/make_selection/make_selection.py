@@ -38,7 +38,7 @@ BACKSPACE   = 8
 SPACEBAR    = 32
 
 class Menu:
-    def __init__(self, options: list, label: str, window_size: int=10) -> None:
+    def __init__(self, options: list, label: str, window_size: int=10, select_multiple: bool=False) -> None:
         assert options
         assert label
         assert 1 <= window_size
@@ -50,6 +50,8 @@ class Menu:
         self.search_string = ""
         self.label = label
         self.selected_index = 0
+        self.selected_list = []
+        self.select_multiple = select_multiple
         self.window_top = 0
         self.window_size_original = window_size
         self.window_size_current = window_size
@@ -94,7 +96,11 @@ class Menu:
                 something_changed = True
             elif char == ENTER_KEY and self.options_current:
                 self.printSelected()
-                return self.options_current[self.selected_index]
+                selected_item = self.options_current[self.selected_index]
+                if self.select_multiple:
+                    raise NotImplementedError("Coming soon...")
+                else:
+                    return selected_item
             elif char == CTL_C:
                 self.clearMenu(clear_label=True)
                 print("cancelled")
@@ -161,7 +167,7 @@ class Menu:
         self.clearMenu(clear_label=True)
         print(f"{self.label}> {self.options_current[self.selected_index]}")
 
-def makeSelection(options: list[Any], label: str, window_size: int=None) -> Any:
+def makeSelection(options: list[Any], label: str, window_size: int=None, select_multiple: bool=False) -> Any:
     """
     Entry point for menu selection.
 
@@ -179,9 +185,10 @@ def makeSelection(options: list[Any], label: str, window_size: int=None) -> Any:
     Selected value.
     """
     if window_size:
-       return Menu(options, label, window_size).show()
+       return Menu(options, label, window_size=window_size, select_multiple=select_multiple).show()
     else:
-       return Menu(options, label).show()
+       return Menu(options, label, select_multiple=select_multiple).show()
 
 if __name__ == "__main__":
     print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection')}'")
+    print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection', select_multiple=True)}'")
