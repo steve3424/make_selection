@@ -5,12 +5,8 @@ and allows user to select using arrow keys.
 Ansi escape codes are used as described here: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 """
 # TODO: work on linux
-# TODO: enter will add selection to list
-#       remove from current list and original list
-#       keep current search alive
-# TODO: key command to remove from list ?
-# TODO: how to print with list addition/removal
-# TODO: key command to finish
+# TODO: remove from current list and original list
+# TODO: key command to finish and return list
 import sys
 if sys.platform != "win32":
     raise NotImplementedError("This module is only available on Windows.")
@@ -99,7 +95,8 @@ class Menu:
                 self.printSelected()
                 selected_item = self.options_current[self.selected_index]
                 if self.select_multiple:
-                    raise NotImplementedError("Coming soon...")
+                    self.selected_list.append(selected_item)
+                    something_changed = True
                 else:
                     return selected_item
             elif char == CTL_C:
@@ -136,7 +133,8 @@ class Menu:
     def clearMenu(self):
         """
         Clears from beginning of current line to end of screen (not end of line).
-        This assumes the cursor is on the top line (label), which is currently an invariant.
+        This assumes the cursor is on the top line (label), which is currently always true.
+
         [0G move cursor to column 0.
         [J clears to end of screen (not end of line).
         """
