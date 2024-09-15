@@ -1,6 +1,8 @@
 """
 Module for interactive command line menu. Simply accepts a list of str-able objects
 and allows user to select using arrow keys.
+
+Ansi escape codes are used as described here: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 """
 # TODO: work on linux
 # TODO: enter will add selection to list
@@ -89,7 +91,7 @@ class Menu:
                     something_changed = True
             elif char == BACKSPACE and 0 < len(self.search_string):
                 self.search_string = self.search_string[:-1]
-                # Move left, print space, move left again
+                # Move left once ([1D), print space, move left again
                 print("\x1b[1D \x1b[1D", end="", flush=True)
                 self.search(self.options_original)
                 something_changed = True
@@ -132,6 +134,12 @@ class Menu:
         return (32 <= char and char <= 126)
     
     def clearMenu(self):
+        """
+        Clears from beginning of current line to end of screen (not end of line).
+        This assumes the cursor is on the top line (label), which is currently an invariant.
+        [0G move cursor to column 0.
+        [J clears to end of screen (not end of line).
+        """
         print("\x1b[0G\x1b[J", end="", flush=True)
 
     def printMenu(self):
