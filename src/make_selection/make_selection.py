@@ -17,6 +17,7 @@ import sys
 if sys.platform != "win32":
     raise NotImplementedError("This module is only available on Windows.")
 from typing import Any
+from copy import copy
 import msvcrt
 import ctypes
 
@@ -49,7 +50,7 @@ class Menu:
         window_size = min((len(options)), window_size)
 
         self.options_original = options
-        self.options_current = options
+        self.options_current = copy(options)
         self.options_selected = []
         self.search_indices = []
         self.search_string = ""
@@ -99,8 +100,8 @@ class Menu:
                 something_changed = True
             elif char == ENTER_KEY and self.options_current:
                 if self.select_multiple:
+                    self.selectMultipleSelect()
                     something_changed = True
-                    raise NotImplementedError("Coming soon...")
                 else:
                     self.printSelected()
                     return self.options_current[self.selected_index]
@@ -124,11 +125,23 @@ class Menu:
         self.options_current = found_options
         self.search_indices = found_indices
 
+        # TODO: create method
         # Reset window after modifying options
         self.window_top = 0
         self.selected_index = 0
         self.window_size_current = min((len(self.options_current), self.window_size_original))
-    
+
+    def selectMultipleSelect(self) -> None:
+        selected_option = self.options_current[self.selected_index]
+        self.options_current.remove(selected_option)
+        self.options_original.remove(selected_option)
+        self.options_selected.append(selected_option)
+
+        # TODO: create method
+        self.window_top = 0
+        self.selected_index = 0
+        self.window_size_current = min((len(self.options_current), self.window_size_original))
+
     def getChar(self) -> int:
         return ord(msvcrt.getch())
 
