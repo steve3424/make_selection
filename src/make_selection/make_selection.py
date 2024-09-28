@@ -59,7 +59,10 @@ class Menu:
         self.window_top = 0
         self.window_size_original = window_size
         self.window_size_current = window_size
-        self.help_string = "Enter: Select, Ctl+C: Cancel"
+        if multi_select:
+            self.help_string = "Enter: Select, Ctl+C: Cancel, Delete: Complete"
+        else:
+            self.help_string = "Enter: Select, Ctl+C: Cancel"
 
     def show(self):
         self.printMenu()
