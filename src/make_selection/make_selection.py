@@ -50,11 +50,11 @@ class Menu:
 
         self.options_original = options
         self.options_current = options
+        self.options_selected = []
         self.search_indices = []
         self.search_string = ""
         self.label = label
         self.selected_index = 0
-        self.selected_list = []
         self.select_multiple = select_multiple
         self.window_top = 0
         self.window_size_original = window_size
