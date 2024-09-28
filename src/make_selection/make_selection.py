@@ -124,23 +124,14 @@ class Menu:
                 found_options.append(o)
         self.options_current = found_options
         self.search_indices = found_indices
-
-        # TODO: create method
-        # Reset window after modifying options
-        self.window_top = 0
-        self.selected_index = 0
-        self.window_size_current = min((len(self.options_current), self.window_size_original))
+        self.resetWindow()
 
     def selectMultipleSelect(self) -> None:
         selected_option = self.options_current[self.selected_index]
         self.options_current.remove(selected_option)
         self.options_original.remove(selected_option)
         self.options_selected.append(selected_option)
-
-        # TODO: create method
-        self.window_top = 0
-        self.selected_index = 0
-        self.window_size_current = min((len(self.options_current), self.window_size_original))
+        self.resetWindow()
 
     def getChar(self) -> int:
         return ord(msvcrt.getch())
@@ -148,6 +139,11 @@ class Menu:
     def isSearchableChar(self, char):
         return (32 <= char and char <= 126)
     
+    def resetWindow(self):
+        self.window_top = 0
+        self.selected_index = 0
+        self.window_size_current = min((len(self.options_current), self.window_size_original))
+
     def clearMenu(self):
         """
         Clears from beginning of current line to end of screen (not end of line).
