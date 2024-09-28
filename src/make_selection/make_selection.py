@@ -10,6 +10,7 @@ Ansi escape codes are used as described here: https://gist.github.com/fnky/45871
 #       selected.
 #     - Remove from current list and original list
 #       on item selection
+#     - Maintain original index for re-insertion
 #     - TAB switches to delete mode
 #     - DEL completes selection (for now)
 import sys
@@ -187,10 +188,12 @@ def makeSelection(options: list[Any], label: str, window_size: int=None, select_
         Label to describe the items being selected.
     window_size
         Max number of items to show at once.
+    select_multiple
+        Select list of items.
 
     Returns
     -------
-    Selected value.
+    Selected value or list of selected values.
     """
     if window_size:
        return Menu(options, label, window_size=window_size, select_multiple=select_multiple).show()
