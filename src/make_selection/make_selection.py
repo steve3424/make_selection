@@ -98,13 +98,12 @@ class Menu:
                 self.search(self.options_original)
                 something_changed = True
             elif char == ENTER_KEY and self.options_current:
-                self.printSelected()
-                selected_item = self.options_current[self.selected_index]
                 if self.select_multiple:
-                    self.selected_list.append(selected_item)
                     something_changed = True
+                    raise NotImplementedError("Coming soon...")
                 else:
-                    return selected_item
+                    self.printSelected()
+                    return self.options_current[self.selected_index]
             elif char == CTL_C:
                 self.clearMenu()
                 print("cancelled")
