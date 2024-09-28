@@ -8,8 +8,6 @@ Ansi escape codes are used as described here: https://gist.github.com/fnky/45871
 # TODO: MULTIPLE SELECT
 #     - Show number of items in list, don't print
 #       selected.
-#     - Remove from current list and original list
-#       on item selection
 #     - Maintain original index for re-insertion
 #     - TAB switches to delete mode
 #     - DEL completes selection (for now)
