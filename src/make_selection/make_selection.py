@@ -37,7 +37,7 @@ ENTER_KEY   = 13
 CTL_C       = 3
 BACKSPACE   = 8
 SPACEBAR    = 32
-DELETE      = 83
+CTL_RIGHT   = 116
 
 class Menu:
     def __init__(self, options: list, label: str, window_size: int=10, multi_select: bool=False) -> None:
@@ -58,7 +58,7 @@ class Menu:
         self.window_size_original = window_size
         self.window_size_current = window_size
         if multi_select:
-            self.help_string = "Enter: Select, Ctl+C: Cancel, Delete: Complete"
+            self.help_string = "Enter: Select, Ctl+C: Cancel, Ctl\u2192: Done"
         else:
             self.help_string = "Enter: Select, Ctl+C: Cancel"
 
@@ -69,7 +69,7 @@ class Menu:
             char = self.getChar()
             if char == SPECIAL_KEY:
                 char = self.getChar()
-                if char == DELETE and self.multi_select:
+                if char == CTL_RIGHT and self.multi_select:
                     self.printSelectedList()
                     return self.options_selected
                 elif 1 < len(self.options_current):
