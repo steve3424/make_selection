@@ -5,8 +5,13 @@ and allows user to select using arrow keys.
 Ansi escape codes are used as described here: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 """
 # TODO: work on linux
-# TODO: remove from current list and original list
-# TODO: key command to finish and return list
+# TODO: MULTIPLE SELECT
+#     - Show number of items in list, don't print
+#       selected.
+#     - Remove from current list and original list
+#       on item selection
+#     - TAB switches to delete mode
+#     - DEL completes selection (for now)
 import sys
 if sys.platform != "win32":
     raise NotImplementedError("This module is only available on Windows.")
