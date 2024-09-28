@@ -48,8 +48,8 @@ class Menu:
         assert 1 <= window_size
         window_size = min((len(options)), window_size)
 
-        self.options_original = [(i, op) for i,op in enumerate(options)]
-        self.options_current = self.options_original
+        self.options_original = options
+        self.options_current = options
         self.search_indices = []
         self.search_string = ""
         self.label = label
@@ -98,12 +98,13 @@ class Menu:
                 self.search(self.options_original)
                 something_changed = True
             elif char == ENTER_KEY and self.options_current:
+                self.printSelected()
+                selected_item = self.options_current[self.selected_index]
                 if self.select_multiple:
-                    raise NotImplementedError("Coming soon...")
+                    self.selected_list.append(selected_item)
                     something_changed = True
                 else:
-                    self.printSelected()
-                    return self.options_current[self.selected_index][1]
+                    return selected_item
             elif char == CTL_C:
                 self.clearMenu()
                 print("cancelled")
@@ -117,7 +118,7 @@ class Menu:
         found_indices = []
         found_options = []
         for o in search_list:
-            found_i = str(o[1]).lower().find(self.search_string.lower())
+            found_i = str(o).lower().find(self.search_string.lower())
             if found_i != -1:
                 found_indices.append(found_i)
                 found_options.append(o)
@@ -128,7 +129,7 @@ class Menu:
         self.window_top = 0
         self.selected_index = 0
         self.window_size_current = min((len(self.options_current), self.window_size_original))
-
+    
     def getChar(self) -> int:
         return ord(msvcrt.getch())
 
@@ -155,7 +156,7 @@ class Menu:
             self.window_size_current = 1
         else:
             for i in range(self.window_top, bottom):
-                option_to_print = str(self.options_current[i][1])
+                option_to_print = str(self.options_current[i])
                 if self.search_indices:
                     highlight_beg = self.search_indices[i]
                     highlight_end = highlight_beg + len(self.search_string)
@@ -173,7 +174,7 @@ class Menu:
 
     def printSelected(self):
         self.clearMenu()
-        print(f"{self.label}> {self.options_current[self.selected_index][1]}")
+        print(f"{self.label}> {self.options_current[self.selected_index]}")
 
 def makeSelection(options: list[Any], label: str, window_size: int=None, select_multiple: bool=False) -> Any:
     """
