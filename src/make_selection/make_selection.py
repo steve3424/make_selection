@@ -189,7 +189,10 @@ class Menu:
 
     def printSelectedList(self):
         self.clearMenu()
-        print(f"{self.label}> {len(self.options_selected)} items selected!")
+        if len(self.options_selected) <= 3:
+            print(f"{self.label}> {self.options_selected}")
+        else:
+            print(f"{self.label}> [...]")
 
 def makeSelection(options: list[Any], label: str, window_size: int=None, multi_select: bool=False) -> Any:
     """
