@@ -43,7 +43,7 @@ class Menu:
     def __init__(self, options: list, label: str, window_size: int=10, multi_select: bool=False) -> None:
         assert options
         assert label
-        assert 1 <= window_size
+        assert 1 <= window_size and window_size <= 25
         window_size = min((len(options)), window_size)
 
         self.options_original = options
