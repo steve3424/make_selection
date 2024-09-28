@@ -8,9 +8,9 @@ Ansi escape codes are used as described here: https://gist.github.com/fnky/45871
 # TODO: MULTIPLE SELECT
 #     - Show number of items in list, don't print
 #       selected.
-#     - Maintain original index for re-insertion
-#     - TAB switches to delete mode
-#     - DEL completes selection (for now)
+#     - What to print when returning from multi_select?
+#     - Maintain original index for re-insertion.
+#     - TAB switches to delete mode.
 import sys
 if sys.platform != "win32":
     raise NotImplementedError("This module is only available on Windows.")
@@ -39,6 +39,7 @@ ENTER_KEY   = 13
 CTL_C       = 3
 BACKSPACE   = 8
 SPACEBAR    = 32
+DELETE      = 83
 
 class Menu:
     def __init__(self, options: list, label: str, window_size: int=10, select_multiple: bool=False) -> None:
@@ -67,7 +68,10 @@ class Menu:
             char = self.getChar()
             if char == SPECIAL_KEY:
                 char = self.getChar()
-                if 1 < len(self.options_current):
+                if char == DELETE and self.select_multiple:
+                    self.printSelectedList()
+                    return self.options_selected
+                elif 1 < len(self.options_current):
                     # Update selected index
                     if char == UP_ARROW:
                         self.selected_index = (self.selected_index - 1) % len(self.options_current)
@@ -181,6 +185,10 @@ class Menu:
     def printSelected(self):
         self.clearMenu()
         print(f"{self.label}> {self.options_current[self.selected_index]}")
+
+    def printSelectedList(self):
+        self.clearMenu()
+        print(f"{self.label}> {len(self.options_selected)} items selected!")
 
 def makeSelection(options: list[Any], label: str, window_size: int=None, select_multiple: bool=False) -> Any:
     """
