@@ -42,7 +42,7 @@ SPACEBAR    = 32
 DELETE      = 83
 
 class Menu:
-    def __init__(self, options: list, label: str, window_size: int=10, select_multiple: bool=False) -> None:
+    def __init__(self, options: list, label: str, window_size: int=10, multi_select: bool=False) -> None:
         assert options
         assert label
         assert 1 <= window_size
@@ -55,7 +55,7 @@ class Menu:
         self.search_string = ""
         self.label = label
         self.selected_index = 0
-        self.select_multiple = select_multiple
+        self.multi_select = multi_select
         self.window_top = 0
         self.window_size_original = window_size
         self.window_size_current = window_size
@@ -68,7 +68,7 @@ class Menu:
             char = self.getChar()
             if char == SPECIAL_KEY:
                 char = self.getChar()
-                if char == DELETE and self.select_multiple:
+                if char == DELETE and self.multi_select:
                     self.printSelectedList()
                     return self.options_selected
                 elif 1 < len(self.options_current):
@@ -101,7 +101,7 @@ class Menu:
                 self.search(self.options_original)
                 something_changed = True
             elif char == ENTER_KEY and self.options_current:
-                if self.select_multiple:
+                if self.multi_select:
                     self.selectMultipleSelect()
                     something_changed = True
                 else:
@@ -190,7 +190,7 @@ class Menu:
         self.clearMenu()
         print(f"{self.label}> {len(self.options_selected)} items selected!")
 
-def makeSelection(options: list[Any], label: str, window_size: int=None, select_multiple: bool=False) -> Any:
+def makeSelection(options: list[Any], label: str, window_size: int=None, multi_select: bool=False) -> Any:
     """
     Entry point for menu selection.
 
@@ -202,7 +202,7 @@ def makeSelection(options: list[Any], label: str, window_size: int=None, select_
         Label to describe the items being selected.
     window_size
         Max number of items to show at once.
-    select_multiple
+    multi_select
         Select list of items.
 
     Returns
@@ -210,10 +210,10 @@ def makeSelection(options: list[Any], label: str, window_size: int=None, select_
     Selected value or list of selected values.
     """
     if window_size:
-       return Menu(options, label, window_size=window_size, select_multiple=select_multiple).show()
+       return Menu(options, label, window_size=window_size, multi_select=multi_select).show()
     else:
-       return Menu(options, label, select_multiple=select_multiple).show()
+       return Menu(options, label, multi_select=multi_select).show()
 
 if __name__ == "__main__":
     print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection')}'")
-    print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection', select_multiple=True)}'")
+    print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection', multi_select=True)}'")
