@@ -5,12 +5,10 @@ and allows user to select using arrow keys.
 Ansi escape codes are used as described here: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 """
 # TODO: work on linux
-# TODO: MULTIPLE SELECT
-#     - Show number of items in list, don't print
-#       selected.
-#     - What to print when returning from multi_select?
-#     - Maintain original index for re-insertion.
-#     - TAB switches to delete mode.
+# TODO: multi_select: Show number of items in list, don't print selected.
+# TODO: multi_select: What to print when returning from multi_select?
+# TODO: multi_select: Maintain original index for re-insertion.
+# TODO: multi_select: TAB switches to delete mode.
 import sys
 if sys.platform != "win32":
     raise NotImplementedError("This module is only available on Windows.")
@@ -75,7 +73,7 @@ class Menu:
                     self.printSelectedList()
                     return self.options_selected
                 elif 1 < len(self.options_current):
-                    # Update selected index
+                    # NOTE: Update selected index
                     if char == UP_ARROW:
                         self.selected_index = (self.selected_index - 1) % len(self.options_current)
                         something_changed = True
@@ -83,7 +81,7 @@ class Menu:
                         self.selected_index = (self.selected_index + 1) % len(self.options_current)
                         something_changed = True
                 
-                    # Update window
+                    # NOTE: Update window
                     if something_changed:
                         bottom = self.window_top + self.window_size_current
                         if self.selected_index < self.window_top:
@@ -99,7 +97,7 @@ class Menu:
                     something_changed = True
             elif char == BACKSPACE and 0 < len(self.search_string):
                 self.search_string = self.search_string[:-1]
-                # Move left once ([1D), print space, move left again
+                # NOTE: Move left once ([1D), print space, move left again
                 print("\x1b[1D \x1b[1D", end="", flush=True)
                 self.search(self.options_original)
                 something_changed = True
