@@ -192,7 +192,7 @@ class Menu:
         if len(self.options_selected) <= 3:
             print(f"{self.label}> {self.options_selected}")
         else:
-            print(f"{self.label}> [...]")
+            print(f"{self.label}> [{self.options_selected[0]}, ..., {self.options_selected[-1]}]")
 
 def makeSelection(options: list[Any], label: str, window_size: int=None, multi_select: bool=False) -> Any:
     """
