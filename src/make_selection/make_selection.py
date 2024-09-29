@@ -1,11 +1,17 @@
 """
 Module for interactive command line menu. Simply accepts a list of str-able objects
 and allows user to select using arrow keys.
+
+Ansi escape codes are used as described here: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 """
+# TODO: work on all platforms
+# TODO: multi_select: Maintain original index for re-insertion.
+# TODO: multi_select: TAB switches to delete mode.
 import sys
 if sys.platform != "win32":
     raise NotImplementedError("This module is only available on Windows.")
 from typing import Any
+from copy import copy
 import msvcrt
 import ctypes
 
@@ -20,6 +26,7 @@ ANSI_HIGHLIGHT_SEARCH_STRING = "\x1b[95;47m"
 ANSI_YELLOW                  = "\x1b[93m"
 ANSI_BLUE                    = "\x1b[94m"
 ANSI_MAGENTA                 = "\x1b[95m"
+ANSI_GREEN                   = "\x1b[92m"
 ANSI_RESET                   = "\x1b[0m"
 
 SPECIAL_KEY = 224
@@ -29,35 +36,43 @@ ENTER_KEY   = 13
 CTL_C       = 3
 BACKSPACE   = 8
 SPACEBAR    = 32
+CTL_RIGHT   = 116
 
 class Menu:
-    def __init__(self, options: list, label: str, window_size: int=10) -> None:
+    def __init__(self, options: list, label: str, window_size: int=10, multi_select: bool=False) -> None:
         assert options
         assert label
-        assert 1 <= window_size
+        assert 1 <= window_size and window_size <= 25
         window_size = min((len(options)), window_size)
 
         self.options_original = options
-        self.options_current = options
+        self.options_current = copy(options)
+        self.options_selected = []
         self.search_indices = []
         self.search_string = ""
         self.label = label
         self.selected_index = 0
+        self.multi_select = multi_select
         self.window_top = 0
         self.window_size_original = window_size
         self.window_size_current = window_size
-        self.help_string = "Enter: Select, Ctl+C: Cancel"
+        if multi_select:
+            self.help_string = "Enter: Select, Ctl+C: Cancel, Ctl\u2192: Done"
+        else:
+            self.help_string = "Enter: Select, Ctl+C: Cancel"
 
     def show(self):
-        print(f"{ANSI_BLUE}{self.label}>{ANSI_RESET}")
         self.printMenu()
         while True:
             something_changed = False
             char = self.getChar()
             if char == SPECIAL_KEY:
                 char = self.getChar()
-                if 1 < len(self.options_current):
-                    # Update selected index
+                if char == CTL_RIGHT and self.multi_select:
+                    self.printSelected()
+                    return self.options_selected
+                elif 1 < len(self.options_current):
+                    # NOTE: Update selected index
                     if char == UP_ARROW:
                         self.selected_index = (self.selected_index - 1) % len(self.options_current)
                         something_changed = True
@@ -65,7 +80,7 @@ class Menu:
                         self.selected_index = (self.selected_index + 1) % len(self.options_current)
                         something_changed = True
                 
-                    # Update window
+                    # NOTE: Update window
                     if something_changed:
                         bottom = self.window_top + self.window_size_current
                         if self.selected_index < self.window_top:
@@ -81,15 +96,19 @@ class Menu:
                     something_changed = True
             elif char == BACKSPACE and 0 < len(self.search_string):
                 self.search_string = self.search_string[:-1]
-                # Move left, print space, move left again
+                # NOTE: Move left once ([1D), print space, move left again
                 print("\x1b[1D \x1b[1D", end="", flush=True)
                 self.search(self.options_original)
                 something_changed = True
             elif char == ENTER_KEY and self.options_current:
-                self.printSelected()
-                return self.options_current[self.selected_index]
+                if self.multi_select:
+                    self.multiSelectAdd()
+                    something_changed = True
+                else:
+                    self.printSelected()
+                    return self.options_current[self.selected_index]
             elif char == CTL_C:
-                self.clearMenu(clear_label=True)
+                self.clearMenu()
                 print("cancelled")
                 return None
 
@@ -107,25 +126,44 @@ class Menu:
                 found_options.append(o)
         self.options_current = found_options
         self.search_indices = found_indices
+        self.resetWindow()
 
-        # Reset window after modifying options
-        self.window_top = 0
-        self.selected_index = 0
-        self.window_size_current = min((len(self.options_current), self.window_size_original))
-    
+    def multiSelectAdd(self) -> None:
+        selected_option = self.options_current[self.selected_index]
+        self.options_current.remove(selected_option)
+        self.options_original.remove(selected_option)
+        self.options_selected.append(selected_option)
+        self.resetWindow()
+
     def getChar(self) -> int:
         return ord(msvcrt.getch())
 
     def isSearchableChar(self, char):
         return (32 <= char and char <= 126)
     
-    def clearMenu(self, clear_label=False):
-        if clear_label:
-            print("\x1b[0G\x1b[J", end="", flush=True)
-        else:
-            print("\x1b[J")
+    def resetWindow(self):
+        self.window_top = 0
+        self.selected_index = 0
+        self.window_size_current = min((len(self.options_current), self.window_size_original))
+
+    def clearMenu(self):
+        """
+        Clears from beginning of current line to end of screen (not end of line).
+        This assumes the cursor is on the top line (label), which is currently always true.
+
+        [0G move cursor to column 0.
+        [J clears to end of screen (not end of line).
+        """
+        print("\x1b[0G\x1b[J", end="", flush=True)
 
     def printMenu(self):
+        header = f"{ANSI_BLUE}{self.label}>{ANSI_RESET}{self.search_string}"
+        header_num_lines = 1
+        if self.multi_select:
+            header += f"\n{ANSI_GREEN}{len(self.options_selected)} items added!{ANSI_RESET}"
+            header_num_lines = 2
+        print(header)
+
         bottom = self.window_top + self.window_size_current
         if not self.options_current:
             print(f"{ANSI_BLUE}no matches found{ANSI_RESET}")
@@ -148,13 +186,22 @@ class Menu:
                 elif i == self.selected_index:
                     option_to_print = f"{ANSI_HIGHLIGHT}{option_to_print}{ANSI_RESET}"
                 print(option_to_print)
-        print(f"{ANSI_YELLOW}{self.help_string}{ANSI_RESET}\n{ANSI_MOVE_CURSOR.format(up=self.window_size_current + 2, right=len(self.label) + len(self.search_string) + 1)}", end="", flush=True)
+
+        footer = f"{ANSI_YELLOW}{self.help_string}{ANSI_RESET}\n"
+        footer_num_lines = 1
+        print(f"{footer}{ANSI_MOVE_CURSOR.format(up=self.window_size_current + header_num_lines + footer_num_lines, right=len(self.label) + len(self.search_string) + 1)}", end="", flush=True)
 
     def printSelected(self):
-        self.clearMenu(clear_label=True)
-        print(f"{self.label}> {self.options_current[self.selected_index]}")
+        self.clearMenu()
+        if self.multi_select:
+            if len(self.options_selected) <= 3:
+                print(f"{self.label}> {self.options_selected} ({len(self.options_selected)} items)")
+            else:
+                print(f"{self.label}> [{self.options_selected[0]}, ..., {self.options_selected[-1]}] ({len(self.options_selected)} items)")
+        else:
+            print(f"{self.label}> {self.options_current[self.selected_index]}")
 
-def makeSelection(options: list[Any], label: str, window_size: int=None) -> Any:
+def makeSelection(options: list[Any], label: str, window_size: int=None, multi_select: bool=False) -> Any:
     """
     Entry point for menu selection.
 
@@ -166,15 +213,18 @@ def makeSelection(options: list[Any], label: str, window_size: int=None) -> Any:
         Label to describe the items being selected.
     window_size
         Max number of items to show at once.
+    multi_select
+        Select list of items.
 
     Returns
     -------
-    Selected value.
+    Selected value or list of selected values.
     """
     if window_size:
-       return Menu(options, label, window_size).show()
+       return Menu(options, label, window_size=window_size, multi_select=multi_select).show()
     else:
-       return Menu(options, label).show()
+       return Menu(options, label, multi_select=multi_select).show()
 
 if __name__ == "__main__":
     print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection')}'")
+    print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection', multi_select=True)}'")
