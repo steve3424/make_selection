@@ -181,7 +181,7 @@ class Menu:
                 elif i == self.selected_index:
                     option_to_print = f"{ANSI_HIGHLIGHT}{option_to_print}{ANSI_RESET}"
                 print(option_to_print)
-        print(f"{ANSI_YELLOW}{self.help_string}{ANSI_RESET}\n{ANSI_MOVE_CURSOR.format(up=self.window_size_current + 2, right=len(self.label) + len(self.search_string) + 1)}", end="", flush=True)
+        print(f"{ANSI_YELLOW}{self.help_string}{ANSI_RESET}{ANSI_MOVE_CURSOR.format(up=self.window_size_current + 1, right=len(self.label) + len(self.search_string) + 1)}", end="", flush=True)
 
     def printSelected(self):
         self.clearMenu()
