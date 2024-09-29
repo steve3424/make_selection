@@ -4,9 +4,7 @@ and allows user to select using arrow keys.
 
 Ansi escape codes are used as described here: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 """
-# TODO: work on linux
-# TODO: multi_select: Show number of items in list, don't print selected.
-# TODO: multi_select: What to print when returning from multi_select?
+# TODO: work on all platforms
 # TODO: multi_select: Maintain original index for re-insertion.
 # TODO: multi_select: TAB switches to delete mode.
 import sys
@@ -28,6 +26,7 @@ ANSI_HIGHLIGHT_SEARCH_STRING = "\x1b[95;47m"
 ANSI_YELLOW                  = "\x1b[93m"
 ANSI_BLUE                    = "\x1b[94m"
 ANSI_MAGENTA                 = "\x1b[95m"
+ANSI_GREEN                   = "\x1b[92m"
 ANSI_RESET                   = "\x1b[0m"
 
 SPECIAL_KEY = 224
@@ -158,7 +157,13 @@ class Menu:
         print("\x1b[0G\x1b[J", end="", flush=True)
 
     def printMenu(self):
-        print(f"{ANSI_BLUE}{self.label}>{ANSI_RESET}{self.search_string}")
+        header = f"{ANSI_BLUE}{self.label}>{ANSI_RESET}{self.search_string}"
+        header_num_lines = 1
+        if self.multi_select:
+            header += f"\n{ANSI_GREEN}{len(self.options_selected)} items added!{ANSI_RESET}"
+            header_num_lines = 2
+        print(header)
+
         bottom = self.window_top + self.window_size_current
         if not self.options_current:
             print(f"{ANSI_BLUE}no matches found{ANSI_RESET}")
@@ -181,7 +186,10 @@ class Menu:
                 elif i == self.selected_index:
                     option_to_print = f"{ANSI_HIGHLIGHT}{option_to_print}{ANSI_RESET}"
                 print(option_to_print)
-        print(f"{ANSI_YELLOW}{self.help_string}{ANSI_RESET}{ANSI_MOVE_CURSOR.format(up=self.window_size_current + 1, right=len(self.label) + len(self.search_string) + 1)}", end="", flush=True)
+
+        footer = f"{ANSI_YELLOW}{self.help_string}{ANSI_RESET}\n"
+        footer_num_lines = 1
+        print(f"{footer}{ANSI_MOVE_CURSOR.format(up=self.window_size_current + header_num_lines + footer_num_lines, right=len(self.label) + len(self.search_string) + 1)}", end="", flush=True)
 
     def printSelected(self):
         self.clearMenu()
