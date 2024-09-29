@@ -70,7 +70,7 @@ class Menu:
             if char == SPECIAL_KEY:
                 char = self.getChar()
                 if char == CTL_RIGHT and self.multi_select:
-                    self.printSelectedList()
+                    self.printSelected()
                     return self.options_selected
                 elif 1 < len(self.options_current):
                     # NOTE: Update selected index
@@ -185,14 +185,13 @@ class Menu:
 
     def printSelected(self):
         self.clearMenu()
-        print(f"{self.label}> {self.options_current[self.selected_index]}")
-
-    def printSelectedList(self):
-        self.clearMenu()
-        if len(self.options_selected) <= 3:
-            print(f"{self.label}> {self.options_selected}")
+        if self.multi_select:
+            if len(self.options_selected) <= 3:
+                print(f"{self.label}> {self.options_selected}")
+            else:
+                print(f"{self.label}> [{self.options_selected[0]}, ..., {self.options_selected[-1]}]")
         else:
-            print(f"{self.label}> [{self.options_selected[0]}, ..., {self.options_selected[-1]}]")
+            print(f"{self.label}> {self.options_current[self.selected_index]}")
 
 def makeSelection(options: list[Any], label: str, window_size: int=None, multi_select: bool=False) -> Any:
     """
