@@ -103,7 +103,7 @@ class Menu:
                 something_changed = True
             elif char == ENTER_KEY and self.options_current:
                 if self.multi_select:
-                    self.selectMultipleSelect()
+                    self.multiSelectAdd()
                     something_changed = True
                 else:
                     self.printSelected()
@@ -129,7 +129,7 @@ class Menu:
         self.search_indices = found_indices
         self.resetWindow()
 
-    def selectMultipleSelect(self) -> None:
+    def multiSelectAdd(self) -> None:
         selected_option = self.options_current[self.selected_index]
         self.options_current.remove(selected_option)
         self.options_original.remove(selected_option)
