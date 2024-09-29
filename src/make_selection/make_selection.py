@@ -187,9 +187,9 @@ class Menu:
         self.clearMenu()
         if self.multi_select:
             if len(self.options_selected) <= 3:
-                print(f"{self.label}> {self.options_selected}")
+                print(f"{self.label}> {self.options_selected} ({len(self.options_selected)} items)")
             else:
-                print(f"{self.label}> [{self.options_selected[0]}, ..., {self.options_selected[-1]}]")
+                print(f"{self.label}> [{self.options_selected[0]}, ..., {self.options_selected[-1]}] ({len(self.options_selected)} items)")
         else:
             print(f"{self.label}> {self.options_current[self.selected_index]}")
 
