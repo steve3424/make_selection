@@ -10,10 +10,11 @@ Ansi escape codes are used as described here: https://gist.github.com/fnky/45871
 import sys
 if sys.platform != "win32":
     raise NotImplementedError("This module is only available on Windows.")
-from typing import Any
-from copy import copy
 import msvcrt
 import ctypes
+from typing import Any
+from copy import copy
+from enum import Enum
 
 stdout = -11
 enable_ansi_codes = 7
@@ -38,6 +39,11 @@ BACKSPACE   = 8
 SPACEBAR    = 32
 CTL_RIGHT   = 116
 
+class Mode(Enum):
+    NORMAL = 0
+    MULTI_SELECT = 1
+    MULTI_DELETE = 2
+
 class Menu:
     def __init__(self, options: list, label: str, window_size: int=10, multi_select: bool=False) -> None:
         assert options
@@ -52,14 +58,17 @@ class Menu:
         self.search_string = ""
         self.label = label
         self.selected_index = 0
-        self.multi_select = multi_select
         self.window_top = 0
         self.window_size_original = window_size
         self.window_size_current = window_size
+        self.help_string_multi_select = "Enter: Select, Ctl+C: Cancel, Ctl\u2192: Done"
+        self.help_string_normal = "Enter: Select, Ctl+C: Cancel"
         if multi_select:
-            self.help_string = "Enter: Select, Ctl+C: Cancel, Ctl\u2192: Done"
+            self.mode = Mode.MULTI_SELECT
+            self.help_string = self.help_string_multi_select
         else:
-            self.help_string = "Enter: Select, Ctl+C: Cancel"
+            self.mode = Mode.NORMAL
+            self.help_string = self.help_string_normal
 
     def show(self):
         self.printMenu()
@@ -68,9 +77,10 @@ class Menu:
             char = self.getChar()
             if char == SPECIAL_KEY:
                 char = self.getChar()
-                if char == CTL_RIGHT and self.multi_select:
-                    self.printSelected()
-                    return self.options_selected
+                if char == CTL_RIGHT:
+                    if self.mode == Mode.MULTI_SELECT:
+                        self.printSelected()
+                        return self.options_selected
                 elif 1 < len(self.options_current):
                     # NOTE: Update selected index
                     if char == UP_ARROW:
@@ -101,10 +111,10 @@ class Menu:
                 self.search(self.options_original)
                 something_changed = True
             elif char == ENTER_KEY and self.options_current:
-                if self.multi_select:
+                if self.mode == Mode.MULTI_SELECT:
                     self.multiSelectAdd()
                     something_changed = True
-                else:
+                elif self.mode == Mode.NORMAL:
                     self.printSelected()
                     return self.options_current[self.selected_index]
             elif char == CTL_C:
@@ -159,7 +169,7 @@ class Menu:
     def printMenu(self):
         header = f"{ANSI_BLUE}{self.label}>{ANSI_RESET}{self.search_string}"
         header_num_lines = 1
-        if self.multi_select:
+        if self.mode == Mode.MULTI_SELECT:
             header += f"\n{ANSI_GREEN}{len(self.options_selected)} items added!{ANSI_RESET}"
             header_num_lines = 2
         print(header)
@@ -193,7 +203,7 @@ class Menu:
 
     def printSelected(self):
         self.clearMenu()
-        if self.multi_select:
+        if self.mode == Mode.MULTI_SELECT:
             if len(self.options_selected) <= 3:
                 print(f"{self.label}> {self.options_selected} ({len(self.options_selected)} items)")
             else:
