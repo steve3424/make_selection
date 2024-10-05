@@ -10,10 +10,11 @@ Ansi escape codes are used as described here: https://gist.github.com/fnky/45871
 import sys
 if sys.platform != "win32":
     raise NotImplementedError("This module is only available on Windows.")
-from typing import Any
-from copy import copy
 import msvcrt
 import ctypes
+from typing import Any
+from copy import copy
+from enum import Enum
 
 stdout = -11
 enable_ansi_codes = 7
@@ -38,6 +39,16 @@ BACKSPACE   = 8
 SPACEBAR    = 32
 CTL_RIGHT   = 116
 
+class Mode(Enum):
+    NORMAL = 0
+    MULTI_SELECT = 1
+    MULTI_DELETE = 2
+
+class Option:
+    def __init__(self, obj: Any, sub_string_start: int=0) -> None:
+        self.value = obj
+        self.sub_string_start = sub_string_start
+
 class Menu:
     def __init__(self, options: list, label: str, window_size: int=10, multi_select: bool=False) -> None:
         assert options
@@ -45,21 +56,23 @@ class Menu:
         assert 1 <= window_size and window_size <= 25
         window_size = min((len(options)), window_size)
 
-        self.options_original = options
-        self.options_current = copy(options)
+        self.options_original = [Option(op) for op in options]
+        self.options_current = copy(self.options_original)
         self.options_selected = []
-        self.search_indices = []
         self.search_string = ""
         self.label = label
         self.selected_index = 0
-        self.multi_select = multi_select
         self.window_top = 0
         self.window_size_original = window_size
         self.window_size_current = window_size
+        self.help_string_multi_select = "Enter: Select, Ctl+C: Cancel, Ctl\u2192: Done"
+        self.help_string_normal = "Enter: Select, Ctl+C: Cancel"
         if multi_select:
-            self.help_string = "Enter: Select, Ctl+C: Cancel, Ctl\u2192: Done"
+            self.mode = Mode.MULTI_SELECT
+            self.help_string = self.help_string_multi_select
         else:
-            self.help_string = "Enter: Select, Ctl+C: Cancel"
+            self.mode = Mode.NORMAL
+            self.help_string = self.help_string_normal
 
     def show(self):
         self.printMenu()
@@ -68,9 +81,10 @@ class Menu:
             char = self.getChar()
             if char == SPECIAL_KEY:
                 char = self.getChar()
-                if char == CTL_RIGHT and self.multi_select:
-                    self.printSelected()
-                    return self.options_selected
+                if char == CTL_RIGHT:
+                    if self.mode == Mode.MULTI_SELECT:
+                        self.printSelected()
+                        return self.multiSelectGetValues(self.options_selected)
                 elif 1 < len(self.options_current):
                     # NOTE: Update selected index
                     if char == UP_ARROW:
@@ -101,12 +115,12 @@ class Menu:
                 self.search(self.options_original)
                 something_changed = True
             elif char == ENTER_KEY and self.options_current:
-                if self.multi_select:
+                if self.mode == Mode.MULTI_SELECT:
                     self.multiSelectAdd()
                     something_changed = True
-                else:
+                elif self.mode == Mode.NORMAL:
                     self.printSelected()
-                    return self.options_current[self.selected_index]
+                    return self.options_current[self.selected_index].value
             elif char == CTL_C:
                 self.clearMenu()
                 print("cancelled")
@@ -117,15 +131,13 @@ class Menu:
                 self.printMenu()
 
     def search(self, search_list: list) -> None:
-        found_indices = []
         found_options = []
         for o in search_list:
-            found_i = str(o).lower().find(self.search_string.lower())
+            found_i = str(o.value).lower().find(self.search_string.lower())
             if found_i != -1:
-                found_indices.append(found_i)
+                o.sub_string_start = found_i
                 found_options.append(o)
         self.options_current = found_options
-        self.search_indices = found_indices
         self.resetWindow()
 
     def multiSelectAdd(self) -> None:
@@ -134,6 +146,9 @@ class Menu:
         self.options_original.remove(selected_option)
         self.options_selected.append(selected_option)
         self.resetWindow()
+
+    def multiSelectGetValues(self, options: list[Option]) -> list[Any]:
+        return [op.value for op in options]
 
     def getChar(self) -> int:
         return ord(msvcrt.getch())
@@ -159,8 +174,8 @@ class Menu:
     def printMenu(self):
         header = f"{ANSI_BLUE}{self.label}>{ANSI_RESET}{self.search_string}"
         header_num_lines = 1
-        if self.multi_select:
-            header += f"\n{ANSI_GREEN}{len(self.options_selected)} items added!{ANSI_RESET}"
+        if self.mode == Mode.MULTI_SELECT:
+            header += f"\n{ANSI_GREEN}{len(self.options_selected)} items in list!{ANSI_RESET}"
             header_num_lines = 2
         print(header)
 
@@ -172,19 +187,16 @@ class Menu:
             self.window_size_current = 1
         else:
             for i in range(self.window_top, bottom):
-                option_to_print = str(self.options_current[i])
-                if self.search_indices:
-                    highlight_beg = self.search_indices[i]
-                    highlight_end = highlight_beg + len(self.search_string)
-                    opt_beg = option_to_print[0 : highlight_beg]
-                    opt_mid = option_to_print[highlight_beg : highlight_end]
-                    opt_end = option_to_print[highlight_end :]
-                    if i == self.selected_index:
-                        option_to_print = f"{ANSI_HIGHLIGHT}{opt_beg}{ANSI_HIGHLIGHT_SEARCH_STRING}{opt_mid}{ANSI_HIGHLIGHT}{opt_end}{ANSI_RESET}"
-                    else:
-                        option_to_print = f"{opt_beg}{ANSI_MAGENTA}{opt_mid}{ANSI_RESET}{opt_end}"
-                elif i == self.selected_index:
-                    option_to_print = f"{ANSI_HIGHLIGHT}{option_to_print}{ANSI_RESET}"
+                option_to_print = str(self.options_current[i].value)
+                highlight_beg = self.options_current[i].sub_string_start
+                highlight_end = highlight_beg + len(self.search_string)
+                opt_beg = option_to_print[0 : highlight_beg]
+                opt_mid = option_to_print[highlight_beg : highlight_end]
+                opt_end = option_to_print[highlight_end :]
+                if i == self.selected_index:
+                    option_to_print = f"{ANSI_HIGHLIGHT}{opt_beg}{ANSI_HIGHLIGHT_SEARCH_STRING}{opt_mid}{ANSI_HIGHLIGHT}{opt_end}{ANSI_RESET}"
+                else:
+                    option_to_print = f"{opt_beg}{ANSI_MAGENTA}{opt_mid}{ANSI_RESET}{opt_end}"
                 print(option_to_print)
 
         footer = f"{ANSI_YELLOW}{self.help_string}{ANSI_RESET}\n"
@@ -193,13 +205,13 @@ class Menu:
 
     def printSelected(self):
         self.clearMenu()
-        if self.multi_select:
-            if len(self.options_selected) <= 3:
-                print(f"{self.label}> {self.options_selected} ({len(self.options_selected)} items)")
+        if self.mode == Mode.MULTI_SELECT:
+            if len(self.options_selected) == 1:
+                print(f"{self.label}> ({len(self.options_selected)} item) {self.multiSelectGetValues(self.options_selected)}")
             else:
-                print(f"{self.label}> [{self.options_selected[0]}, ..., {self.options_selected[-1]}] ({len(self.options_selected)} items)")
+                print(f"{self.label}> ({len(self.options_selected)} items) [{self.options_selected[0].value}, ...]")
         else:
-            print(f"{self.label}> {self.options_current[self.selected_index]}")
+            print(f"{self.label}> {self.options_current[self.selected_index].value}")
 
 def makeSelection(options: list[Any], label: str, window_size: int=None, multi_select: bool=False) -> Any:
     """
