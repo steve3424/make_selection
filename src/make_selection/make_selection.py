@@ -206,8 +206,10 @@ class Menu:
     def printSelected(self):
         self.clearMenu()
         if self.mode == Mode.MULTI_SELECT:
-            if len(self.options_selected) == 1:
-                print(f"{self.label}> ({len(self.options_selected)} item) {self.multiSelectGetValues(self.options_selected)}")
+            if len(self.options_selected) == 0:
+                print(f"{self.label}> (0 items) []")
+            elif len(self.options_selected) == 1:
+                print(f"{self.label}> (1 item) {self.multiSelectGetValues(self.options_selected)}")
             else:
                 print(f"{self.label}> ({len(self.options_selected)} items) [{self.options_selected[0].value}, ...]")
         else:
