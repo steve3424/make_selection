@@ -175,7 +175,7 @@ class Menu:
         header = f"{ANSI_BLUE}{self.label}>{ANSI_RESET}{self.search_string}"
         header_num_lines = 1
         if self.mode == Mode.MULTI_SELECT:
-            header += f"\n{ANSI_GREEN}{len(self.options_selected)} items added!{ANSI_RESET}"
+            header += f"\n{ANSI_GREEN}{len(self.options_selected)} items in list!{ANSI_RESET}"
             header_num_lines = 2
         print(header)
 
@@ -206,10 +206,10 @@ class Menu:
     def printSelected(self):
         self.clearMenu()
         if self.mode == Mode.MULTI_SELECT:
-            if len(self.options_selected) <= 3:
-                print(f"{self.label}> {self.multiSelectGetValues(self.options_selected)} ({len(self.options_selected)} items)")
+            if len(self.options_selected) == 1:
+                print(f"{self.label}> ({len(self.options_selected)} item) {self.multiSelectGetValues(self.options_selected)}")
             else:
-                print(f"{self.label}> [{self.options_selected[0].value}, ..., {self.options_selected[-1].value}] ({len(self.options_selected)} items)")
+                print(f"{self.label}> ({len(self.options_selected)} items) [{self.options_selected[0].value}, ...]")
         else:
             print(f"{self.label}> {self.options_current[self.selected_index].value}")
 
