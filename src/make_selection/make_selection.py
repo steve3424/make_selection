@@ -145,7 +145,7 @@ class Menu:
         self.options_current.remove(selected_option)
         self.options_original.remove(selected_option)
         self.options_selected.append(selected_option)
-        self.resetWindow()
+        self.resetWindowMultiSelect()
 
     def multiSelectGetValues(self, options: list[Option]) -> list[Any]:
         return [op.value for op in options]
@@ -160,6 +160,33 @@ class Menu:
         self.window_top = 0
         self.selected_index = 0
         self.window_size_current = min((len(self.options_current), self.window_size_original))
+
+    def resetWindowMultiSelect(self):
+        """
+        After selecting item and shrinking the list we try would like to keep
+        the selected_index and window the same. This visually looks like the
+        list is being pulled up and the selected index goes to the next item.
+
+        First we will try and shift the window up, keeping the selected index
+        the same. Visually this looks a bit weird as the selected index looks
+        to be moving down the list, but the behavior I think is good because
+        the index goes to the next item in the list. If we kept the index static
+        on the screen it would be moving to the previous item instead of the next
+        which I don't think I want.
+
+        If we can't keep the list the same or shift the window up, that means the
+        list is too small and we will just shrink the window.
+        """
+        window_bottom_current = self.window_top + self.window_size_current
+        if len(self.options_current) < window_bottom_current:
+            if 0 < self.window_top:
+                self.window_top -= 1
+            else:
+                self.window_size_current -= 1
+            # NOTE: this must be calculated after we change top/size above
+            window_bottom_new = self.window_top + self.window_size_current
+            if window_bottom_new <= self.selected_index:
+                self.selected_index -= 1
 
     def clearMenu(self):
         """
