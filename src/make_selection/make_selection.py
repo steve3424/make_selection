@@ -202,7 +202,7 @@ class Menu:
         header = f"{ANSI_BLUE}{self.label}>{ANSI_RESET}{self.search_string}"
         header_num_lines = 1
         if self.mode == Mode.MULTI_SELECT:
-            header += f"\n{ANSI_GREEN}{len(self.options_selected)} items in list!{ANSI_RESET}"
+            header += f"\n{ANSI_GREEN}{len(self.options_selected)} items selected!{ANSI_RESET}"
             header_num_lines = 2
         print(header)
 
