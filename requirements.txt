@@ -1,5 +1,5 @@
 backports.tarfile==1.2.0
-build==1.2.1
+build==1.4.0
 certifi==2024.7.4
 charset-normalizer==3.3.2
 colorama==0.4.6
@@ -14,7 +14,7 @@ markdown-it-py==3.0.0
 mdurl==0.1.2
 more-itertools==10.4.0
 nh3==0.2.18
-packaging==24.1
+packaging==25.0
 pkginfo==1.10.0
 Pygments==2.18.0
 pyproject_hooks==1.1.0
