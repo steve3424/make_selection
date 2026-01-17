@@ -105,13 +105,13 @@ class Menu:
                 char = chr(char)
                 self.search_string = f"{self.search_string}{char}".lstrip()
                 if self.search_string:
-                    print(char, end="", flush=True)
+                    print(char, end="", flush=True, file=sys.stderr)
                     self.search(self.options_current)
                     something_changed = True
             elif char == BACKSPACE and 0 < len(self.search_string):
                 self.search_string = self.search_string[:-1]
                 # NOTE: Move left once ([1D), print space, move left again
-                print("\x1b[1D \x1b[1D", end="", flush=True)
+                print("\x1b[1D \x1b[1D", end="", flush=True, file=sys.stderr)
                 self.search(self.options_original)
                 something_changed = True
             elif char == ENTER_KEY and self.options_current:
@@ -123,7 +123,7 @@ class Menu:
                     return self.options_current[self.selected_index].value
             elif char == CTL_C:
                 self.clearMenu()
-                print("cancelled")
+                print("cancelled", file=sys.stderr)
                 return None
 
             if something_changed:
@@ -196,7 +196,7 @@ class Menu:
         [0G move cursor to column 0.
         [J clears to end of screen (not end of line).
         """
-        print("\x1b[0G\x1b[J", end="", flush=True)
+        print("\x1b[0G\x1b[J", end="", flush=True, file=sys.stderr)
 
     def printMenu(self):
         header = f"{ANSI_BLUE}{self.label}>{ANSI_RESET}{self.search_string}"
@@ -204,11 +204,11 @@ class Menu:
         if self.mode == Mode.MULTI_SELECT:
             header += f"\n{ANSI_GREEN}{len(self.options_selected)} items selected!{ANSI_RESET}"
             header_num_lines = 2
-        print(header)
+        print(header, file=sys.stderr)
 
         bottom = self.window_top + self.window_size_current
         if not self.options_current:
-            print(f"{ANSI_BLUE}no matches found{ANSI_RESET}")
+            print(f"{ANSI_BLUE}no matches found{ANSI_RESET}", file=sys.stderr)
             # NOTE: window size is 0 here after empty search, but we are printing 1 line
             #       so we need to set it so the footer prints correctly
             self.window_size_current = 1
@@ -224,23 +224,23 @@ class Menu:
                     option_to_print = f"{ANSI_HIGHLIGHT}{opt_beg}{ANSI_HIGHLIGHT_SEARCH_STRING}{opt_mid}{ANSI_HIGHLIGHT}{opt_end}{ANSI_RESET}"
                 else:
                     option_to_print = f"{opt_beg}{ANSI_MAGENTA}{opt_mid}{ANSI_RESET}{opt_end}"
-                print(option_to_print)
+                print(option_to_print, file=sys.stderr)
 
         footer = f"{ANSI_YELLOW}{self.help_string}{ANSI_RESET}\n"
         footer_num_lines = 1
-        print(f"{footer}{ANSI_MOVE_CURSOR.format(up=self.window_size_current + header_num_lines + footer_num_lines, right=len(self.label) + len(self.search_string) + 1)}", end="", flush=True)
+        print(f"{footer}{ANSI_MOVE_CURSOR.format(up=self.window_size_current + header_num_lines + footer_num_lines, right=len(self.label) + len(self.search_string) + 1)}", end="", flush=True, file=sys.stderr)
 
     def printSelected(self):
         self.clearMenu()
         if self.mode == Mode.MULTI_SELECT:
             if len(self.options_selected) == 0:
-                print(f"{self.label}> (0 items) []")
+                print(f"{self.label}> (0 items) []", file=sys.stderr)
             elif len(self.options_selected) == 1:
-                print(f"{self.label}> (1 item) {self.multiSelectGetValues(self.options_selected)}")
+                print(f"{self.label}> (1 item) {self.multiSelectGetValues(self.options_selected)}", file=sys.stderr)
             else:
-                print(f"{self.label}> ({len(self.options_selected)} items) [{self.options_selected[0].value}, ...]")
+                print(f"{self.label}> ({len(self.options_selected)} items) [{self.options_selected[0].value}, ...]", file=sys.stderr)
         else:
-            print(f"{self.label}> {self.options_current[self.selected_index].value}")
+            print(f"{self.label}> {self.options_current[self.selected_index].value}", file=sys.stderr)
 
 def makeSelection(options: list[Any], label: str, window_size: int=None, multi_select: bool=False) -> Any:
     """
@@ -267,5 +267,5 @@ def makeSelection(options: list[Any], label: str, window_size: int=None, multi_s
        return Menu(options, label, multi_select=multi_select).show()
 
 if __name__ == "__main__":
-    print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection')}'")
-    print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection', multi_select=True)}'")
+    print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection')}'", file=sys.stderr)
+    print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection', multi_select=True)}'", file=sys.stderr)
