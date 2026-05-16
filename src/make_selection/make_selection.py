@@ -52,7 +52,7 @@ class Menu:
         self.window_top = 0
         self.window_size_original = window_size
         self.window_size_current = window_size
-        self.help_string_multi_select = "Enter: Select, Ctl+C: Cancel, Ctl\u2192: Done"
+        self.help_string_multi_select = "Enter: Select, Ctl+C: Cancel, Tab\u21E5 : Done"
         self.help_string_normal = "Enter: Select, Ctl+C: Cancel"
         if multi_select:
             self.mode = Mode.MULTI_SELECT
