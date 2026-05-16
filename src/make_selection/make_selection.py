@@ -8,18 +8,14 @@ Ansi escape codes are used as described here: https://gist.github.com/fnky/45871
 # TODO: multi_select: Maintain original index for re-insertion.
 # TODO: multi_select: TAB switches to delete mode.
 import sys
-if sys.platform != "win32":
-    raise NotImplementedError("This module is only available on Windows.")
-import msvcrt
-import ctypes
+if sys.platform == "win32":
+    from windows import getChar
+else:
+    raise NotImplementedError(f"Platform '{sys.platform}' not supported!")
 from typing import Any
 from copy import copy
 from enum import Enum
-
-stdout = -11
-enable_ansi_codes = 7
-kernel32 = ctypes.windll.kernel32
-kernel32.SetConsoleMode(kernel32.GetStdHandle(stdout), enable_ansi_codes)
+from key_codes import KeyCode
 
 ANSI_MOVE_CURSOR             = "\x1b[{up}F\r\x1b[{right}C"
 ANSI_HIGHLIGHT               = "\x1b[30;47m"
@@ -29,15 +25,6 @@ ANSI_BLUE                    = "\x1b[94m"
 ANSI_MAGENTA                 = "\x1b[95m"
 ANSI_GREEN                   = "\x1b[92m"
 ANSI_RESET                   = "\x1b[0m"
-
-SPECIAL_KEY = 224
-UP_ARROW    = 72
-DOWN_ARROW  = 80
-ENTER_KEY   = 13
-CTL_C       = 3
-BACKSPACE   = 8
-SPACEBAR    = 32
-CTL_RIGHT   = 116
 
 class Mode(Enum):
     NORMAL = 0
@@ -65,7 +52,7 @@ class Menu:
         self.window_top = 0
         self.window_size_original = window_size
         self.window_size_current = window_size
-        self.help_string_multi_select = "Enter: Select, Ctl+C: Cancel, Ctl\u2192: Done"
+        self.help_string_multi_select = "Enter: Select, Ctl+C: Cancel, Tab\u21E5 : Done"
         self.help_string_normal = "Enter: Select, Ctl+C: Cancel"
         if multi_select:
             self.mode = Mode.MULTI_SELECT
@@ -78,53 +65,42 @@ class Menu:
         self.printMenu()
         while True:
             something_changed = False
-            char = self.getChar()
-            if char == SPECIAL_KEY:
-                char = self.getChar()
-                if char == CTL_RIGHT:
-                    if self.mode == Mode.MULTI_SELECT:
-                        self.printSelected()
-                        return self.multiSelectGetValues(self.options_selected)
-                elif 1 < len(self.options_current):
-                    # NOTE: Update selected index
-                    if char == UP_ARROW:
-                        self.selected_index = (self.selected_index - 1) % len(self.options_current)
-                        something_changed = True
-                    elif char == DOWN_ARROW:
-                        self.selected_index = (self.selected_index + 1) % len(self.options_current)
-                        something_changed = True
-                
-                    # NOTE: Update window
-                    if something_changed:
-                        bottom = self.window_top + self.window_size_current
-                        if self.selected_index < self.window_top:
-                            self.window_top = self.selected_index
-                        elif bottom <= self.selected_index:
-                            self.window_top = self.selected_index - self.window_size_current + 1
-            elif self.isSearchableChar(char):
-                char = chr(char)
-                self.search_string = f"{self.search_string}{char}".lstrip()
-                if self.search_string:
-                    print(char, end="", flush=True, file=sys.stderr)
-                    self.search(self.options_current)
-                    something_changed = True
-            elif char == BACKSPACE and 0 < len(self.search_string):
-                self.search_string = self.search_string[:-1]
-                # NOTE: Move left once ([1D), print space, move left again
-                print("\x1b[1D \x1b[1D", end="", flush=True, file=sys.stderr)
-                self.search(self.options_original)
+            key_code, char = getChar()
+            if key_code in (KeyCode.UP, KeyCode.DOWN) and 1 < len(self.options_current):
+                window_shift = 1 if key_code == KeyCode.DOWN else -1
+                self.selected_index = (self.selected_index + window_shift) % len(self.options_current)
+                bottom = self.window_top + self.window_size_current
+                if self.selected_index < self.window_top:
+                    self.window_top = self.selected_index
+                elif bottom <= self.selected_index:
+                    self.window_top = self.selected_index - self.window_size_current + 1
                 something_changed = True
-            elif char == ENTER_KEY and self.options_current:
+            elif key_code == KeyCode.SELECT and self.options_current:
                 if self.mode == Mode.MULTI_SELECT:
                     self.multiSelectAdd()
                     something_changed = True
                 elif self.mode == Mode.NORMAL:
                     self.printSelected()
                     return self.options_current[self.selected_index].value
-            elif char == CTL_C:
+            elif key_code == KeyCode.SEARCHABLE:
+                self.search_string = f"{self.search_string}{char}".lstrip()
+                if self.search_string:
+                    print(char, end="", flush=True, file=sys.stderr)
+                    self.search(self.options_current)
+                    something_changed = True
+            elif key_code == KeyCode.DELETE_CHAR and 0 < len(self.search_string):
+                self.search_string = self.search_string[:-1]
+                # NOTE: Move left once ([1D), print space, move left again
+                print("\x1b[1D \x1b[1D", end="", flush=True, file=sys.stderr)
+                self.search(self.options_original)
+                something_changed = True
+            elif key_code == KeyCode.CANCEL:
                 self.clearMenu()
                 print("cancelled", file=sys.stderr)
                 return None
+            elif key_code == KeyCode.SELECT_MULTI and self.mode == Mode.MULTI_SELECT:
+                    self.printSelected()
+                    return self.multiSelectGetValues(self.options_selected)
 
             if something_changed:
                 self.clearMenu()
@@ -150,12 +126,6 @@ class Menu:
     def multiSelectGetValues(self, options: list[Option]) -> list[Any]:
         return [op.value for op in options]
 
-    def getChar(self) -> int:
-        return ord(msvcrt.getch())
-
-    def isSearchableChar(self, char):
-        return (32 <= char and char <= 126)
-    
     def resetWindow(self):
         self.window_top = 0
         self.selected_index = 0

@@ -1,5 +1,8 @@
 .vscode/
 venv/
 dist/
+
+*.pyc
 *.egg-info
+
 local_*
