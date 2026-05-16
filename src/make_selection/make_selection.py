@@ -9,7 +9,7 @@ Ansi escape codes are used as described here: https://gist.github.com/fnky/45871
 # TODO: multi_select: TAB switches to delete mode.
 import sys
 if sys.platform == "win32":
-    from windows import getChar
+    from win32_mappings import getChar
 else:
     raise NotImplementedError(f"Platform '{sys.platform}' not supported!")
 from typing import Any
