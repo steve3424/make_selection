@@ -35,6 +35,7 @@ def getChar() -> tuple[KeyCode|None, str|None]:
         key_code = KeyCode.CANCEL
     elif isSearchable(key_press):
         key_code = KeyCode.SEARCHABLE
+        char = chr(key_press)
     elif key_press == BACKSPACE:
         key_code = KeyCode.DELETE_CHAR
     elif key_press == TAB:
