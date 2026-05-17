@@ -10,7 +10,8 @@ Ansi escape codes are used as described here: https://gist.github.com/fnky/45871
 import sys
 if sys.platform == "win32":
     from mappings.windows import getChar
-# elif sys.platform == "darwin":
+elif sys.platform == "darwin":
+    from mappings.mac import getChar
 else:
     raise NotImplementedError(f"Platform '{sys.platform}' not supported!")
 from typing import Any
