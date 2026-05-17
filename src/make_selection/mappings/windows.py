@@ -10,9 +10,9 @@ kernel32.SetConsoleMode(kernel32.GetStdHandle(stdout), enable_ansi_codes)
 SPECIAL_KEY = 224
 ARROW_UP    = 72
 ARROW_DOWN  = 80
-TAB         = 9
 ENTER       = 13
 CTL_C       = 3
+CTL_RIGHT   = 116
 BACKSPACE   = 8
 
 def isSearchable(char: int) -> bool:
@@ -29,14 +29,14 @@ def getChar() -> tuple[KeyCode|None, str|None]:
             key_code = KeyCode.UP
         elif key_press == ARROW_DOWN:
             key_code = KeyCode.DOWN
+        elif key_press == CTL_RIGHT:
+            key_code = KeyCode.SELECT_MULTI
     elif key_press == ENTER:
         key_code = KeyCode.SELECT
     elif key_press == CTL_C:
         key_code = KeyCode.CANCEL
     elif key_press == BACKSPACE:
         key_code = KeyCode.DELETE_CHAR
-    elif key_press == TAB:
-        key_code = KeyCode.SELECT_MULTI
     elif isSearchable(key_press):
         key_code = KeyCode.SEARCHABLE
         char = chr(key_press)
