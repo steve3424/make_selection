@@ -4,12 +4,15 @@ and allows user to select using arrow keys.
 
 Ansi escape codes are used as described here: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 """
-# TODO: work on all platforms
 # TODO: multi_select: Maintain original index for re-insertion.
 # TODO: multi_select: TAB switches to delete mode.
 import sys
 if sys.platform == "win32":
-    from windows import getChar
+    from mappings.windows import getChar
+    multi_select_modifier_string = "Ctl"
+elif sys.platform == "darwin":
+    from mappings.mac import getChar
+    multi_select_modifier_string = "Cmd"
 else:
     raise NotImplementedError(f"Platform '{sys.platform}' not supported!")
 from typing import Any
@@ -24,6 +27,7 @@ ANSI_YELLOW                  = "\x1b[93m"
 ANSI_BLUE                    = "\x1b[94m"
 ANSI_MAGENTA                 = "\x1b[95m"
 ANSI_GREEN                   = "\x1b[92m"
+ANSI_RED                     = "\x1b[91m"
 ANSI_RESET                   = "\x1b[0m"
 
 class Mode(Enum):
@@ -52,7 +56,7 @@ class Menu:
         self.window_top = 0
         self.window_size_original = window_size
         self.window_size_current = window_size
-        self.help_string_multi_select = "Enter: Select, Ctl+C: Cancel, Tab\u21E5 : Done"
+        self.help_string_multi_select = f"Enter: Select, Ctl+C: Cancel, {multi_select_modifier_string}\u2192: Done"
         self.help_string_normal = "Enter: Select, Ctl+C: Cancel"
         if multi_select:
             self.mode = Mode.MULTI_SELECT
@@ -237,5 +241,48 @@ def makeSelection(options: list[Any], label: str, window_size: int=None, multi_s
        return Menu(options, label, multi_select=multi_select).show()
 
 if __name__ == "__main__":
-    print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection')}'", file=sys.stderr)
-    print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection', multi_select=True)}'", file=sys.stderr)
+    import argparse
+    def showcase():
+        print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection')}'", file=sys.stderr)
+        print(f"Returns: '{makeSelection(['interactive', 'cli', 'menu'], 'make_selection', multi_select=True)}'", file=sys.stderr)
+    
+    def test_input():
+        print(f"{ANSI_YELLOW}Testing keyboard interactively!{ANSI_RESET}")
+        test_cases = [
+            ("Press up arrow \u2191",    (KeyCode.UP, None)),
+            ("Press down arrow \u2193",  (KeyCode.DOWN, None)),
+            ("Press right arrow \u2192", (None, None)),
+            ("Press left arrow \u2190",  (None, None)),
+            ("Press enter \u21B5",       (KeyCode.SELECT, None)),
+            (f"Press {multi_select_modifier_string}+right", (KeyCode.SELECT_MULTI, None)),
+            ("Press backspace \u232b",   (KeyCode.DELETE_CHAR, None)),
+            ("Press lowercase a",        (KeyCode.SEARCHABLE, 'a')),
+            ("Press uppercase A",        (KeyCode.SEARCHABLE, 'A')),
+            ("Press number 7",           (KeyCode.SEARCHABLE, '7')),
+            ("Press pound #",            (KeyCode.SEARCHABLE, '#')),
+            ("Press ctl+c",              (KeyCode.CANCEL, None)),
+        ]
+        num_errors = 0
+        for msg, expected in test_cases:
+            print(msg, end="", flush=True)
+            if getChar() == expected:
+                print(" [\u2705]")
+            else:
+                num_errors += 1
+                print(" [\u274C]")
+        if num_errors == 0:
+            print(f"{ANSI_GREEN}Working :){ANSI_RESET}")
+        else:
+            print(f"{ANSI_RED}not working :({ANSI_RESET}")
+
+    arg_parser = argparse.ArgumentParser(description="Interactive testing.")
+    sub_parsers = arg_parser.add_subparsers(required=True)
+
+    arg_parser_showcase = sub_parsers.add_parser("showcase", help="Interactive example.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    arg_parser_showcase.set_defaults(func=showcase)
+
+    arg_parser_test_keys = sub_parsers.add_parser("test_keys", help="Test keyboard input.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    arg_parser_test_keys.set_defaults(func=test_input)
+
+    args_main = arg_parser.parse_args()
+    args_main.func()
