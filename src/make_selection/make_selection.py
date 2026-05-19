@@ -9,8 +9,10 @@ Ansi escape codes are used as described here: https://gist.github.com/fnky/45871
 import sys
 if sys.platform == "win32":
     from mappings.windows import getChar
+    multi_select_modifier_string = "Ctl"
 elif sys.platform == "darwin":
     from mappings.mac import getChar
+    multi_select_modifier_string = "Cmd"
 else:
     raise NotImplementedError(f"Platform '{sys.platform}' not supported!")
 from typing import Any
@@ -54,7 +56,7 @@ class Menu:
         self.window_top = 0
         self.window_size_original = window_size
         self.window_size_current = window_size
-        self.help_string_multi_select = "Enter: Select, Ctl+C: Cancel, Ctl\u2192: Done"
+        self.help_string_multi_select = f"Enter: Select, Ctl+C: Cancel, {multi_select_modifier_string}\u2192: Done"
         self.help_string_normal = "Enter: Select, Ctl+C: Cancel"
         if multi_select:
             self.mode = Mode.MULTI_SELECT
@@ -252,7 +254,7 @@ if __name__ == "__main__":
             ("Press right arrow \u2192", (None, None)),
             ("Press left arrow \u2190",  (None, None)),
             ("Press enter \u21B5",       (KeyCode.SELECT, None)),
-            ("Press ctl+right",          (KeyCode.SELECT_MULTI, None)),
+            (f"Press {multi_select_modifier_string}+right", (KeyCode.SELECT_MULTI, None)),
             ("Press backspace \u232b",   (KeyCode.DELETE_CHAR, None)),
             ("Press lowercase a",        (KeyCode.SEARCHABLE, 'a')),
             ("Press uppercase A",        (KeyCode.SEARCHABLE, 'A')),
@@ -269,9 +271,9 @@ if __name__ == "__main__":
                 num_errors += 1
                 print(" [\u274C]")
         if num_errors == 0:
-            print(f"{ANSI_GREEN}0 errors :){ANSI_RESET}")
+            print(f"{ANSI_GREEN}Working :){ANSI_RESET}")
         else:
-            print(f"{ANSI_RED}{num_errors} errors :({ANSI_RESET}")
+            print(f"{ANSI_RED}not working :({ANSI_RESET}")
 
     arg_parser = argparse.ArgumentParser(description="Interactive testing.")
     sub_parsers = arg_parser.add_subparsers(required=True)
