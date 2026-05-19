@@ -48,7 +48,6 @@ class TestWindowsMappings(unittest.TestCase):
         self.assertEqual(key_code, KeyCode.DELETE_CHAR)
         self.assertEqual(char, None)
 
-
     @patch("msvcrt.getch")
     def test_searchables(self, getch_mock: MagicMock):
         test_cases = [chr(i) for i in range(32, 127)]
