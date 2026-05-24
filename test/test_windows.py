@@ -1,12 +1,7 @@
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src/make_selection")
-
 import unittest
-import mappings.windows as windows
-from key_codes import KeyCode
+import src.make_selection.mappings.windows as windows
+from src.make_selection.key_codes import KeyCode
 from unittest.mock import patch, MagicMock
-
 
 class TestWindowsMappings(unittest.TestCase):
     @patch("msvcrt.getch")
