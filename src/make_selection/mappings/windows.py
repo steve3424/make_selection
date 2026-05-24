@@ -1,6 +1,6 @@
 import msvcrt
 import ctypes
-from key_codes import KeyCode
+from ..key_codes import KeyCode
 
 stdout = -11
 enable_ansi_codes = 7

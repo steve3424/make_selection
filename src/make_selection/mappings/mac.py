@@ -2,7 +2,7 @@ import os
 import sys
 import termios
 import tty
-from key_codes import KeyCode
+from ..key_codes import KeyCode
 
 ARROW_UP   = b"\x1b[A"
 ARROW_DOWN = b"\x1b[B"
