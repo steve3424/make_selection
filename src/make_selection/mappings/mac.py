@@ -11,7 +11,7 @@ CTL_C      = b"\x03"
 ENTER_PATTERNS     = b"\r\n"
 BACKSPACE_PATTERNS = b"\x08\x7f"
 
-def _is_searchable(key_press: bytes) -> bool:
+def isSearchable(key_press: bytes) -> bool:
     try:
         key_press = ord(key_press.decode())
         return (32 <= key_press and key_press <= 126)
@@ -45,7 +45,7 @@ def getChar() -> tuple[KeyCode|None, str|None]:
         key_code = KeyCode.CANCEL
     elif key_press in BACKSPACE_PATTERNS:
         key_code = KeyCode.DELETE_CHAR
-    elif _is_searchable(key_press):
+    elif isSearchable(key_press):
         key_code = KeyCode.SEARCHABLE
         char = key_press.decode()
     return key_code, char
