@@ -17,14 +17,17 @@ BACKSPACE   = 8
 
 def isSearchable(char: int) -> bool:
     return (32 <= char and char <= 126)
+
+def readKeyPress() -> int:
+    return ord(msvcrt.getch())
     
 def getChar() -> tuple[KeyCode|None, str|None]:
     key_code = None
     char = None
 
-    key_press = ord(msvcrt.getch())
+    key_press = readKeyPress()
     if key_press == SPECIAL_KEY:
-        key_press = ord(msvcrt.getch())
+        key_press = readKeyPress()
         if key_press == ARROW_UP:
             key_code = KeyCode.UP
         elif key_press == ARROW_DOWN:
