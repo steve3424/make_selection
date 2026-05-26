@@ -4,6 +4,8 @@ import termios
 import tty
 from ..key_codes import KeyCode
 
+# NOTE: For cli tool
+SPECIAL_KEY=None
 ARROW_UP   = b"\x1b[A"
 ARROW_DOWN = b"\x1b[B"
 CMD_RIGHT  = b"\x05"

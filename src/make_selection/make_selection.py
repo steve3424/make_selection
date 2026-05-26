@@ -8,10 +8,10 @@ Ansi escape codes are used as described here: https://gist.github.com/fnky/45871
 # TODO: multi_select: TAB switches to delete mode.
 import sys
 if sys.platform == "win32":
-    from .mappings.windows import getChar
+    from .mappings.windows import *
     multi_select_modifier_string = "Ctl"
 elif sys.platform == "darwin":
-    from .mappings.mac import getChar
+    from .mappings.mac import *
     multi_select_modifier_string = "Cmd"
 else:
     raise NotImplementedError(f"Platform '{sys.platform}' not supported!")
