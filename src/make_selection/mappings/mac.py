@@ -18,7 +18,7 @@ def isSearchable(key_press: bytes) -> bool:
     except:
         return False
 
-def _read_key_press() -> bytes:
+def readKeyPress() -> bytes:
     try:
         fd = sys.stdin.fileno()
         old_settings = termios.tcgetattr(fd)
@@ -29,7 +29,7 @@ def _read_key_press() -> bytes:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
 def getChar() -> tuple[KeyCode|None, str|None]:
-    key_press: bytes = _read_key_press()
+    key_press: bytes = readKeyPress()
 
     key_code = None
     char = None
