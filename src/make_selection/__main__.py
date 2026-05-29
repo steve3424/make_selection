@@ -36,13 +36,15 @@ def test_keys():
 
 def explore():
     print("Start pressing keys to see what values are read!")
+    print(f"{ANSI_YELLOW}ctl+c to cancel{ANSI_RESET}")
     while True:
         key_press = readKeyPress()
         if key_press == SPECIAL_KEY:
             key_press = (key_press, readKeyPress())
-        print(f"Key pressed: {key_press}")
         if key_press == CTL_C:
+            print(f"Key pressed: {key_press} {ANSI_RED}(cancelled){ANSI_RESET}")
             break
+        print(f"Key pressed: {key_press}")
 
 arg_parser = argparse.ArgumentParser(description="Interactive testing.")
 sub_parsers = arg_parser.add_subparsers(required=True)
