@@ -12,7 +12,7 @@ if sys.platform == "win32":
     multi_select_modifier_string = "Ctl"
 elif sys.platform == "darwin":
     from .mappings.mac import *
-    multi_select_modifier_string = "Cmd"
+    multi_select_modifier_string = "\u2325"
 else:
     raise NotImplementedError(f"Platform '{sys.platform}' not supported!")
 from typing import Any

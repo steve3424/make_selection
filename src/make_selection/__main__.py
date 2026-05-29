@@ -13,7 +13,7 @@ def test_keys():
         ("Press right arrow \u2192", (None, None)),
         ("Press left arrow \u2190",  (None, None)),
         ("Press enter \u21B5",       (KeyCode.SELECT, None)),
-        (f"Press {multi_select_modifier_string}+right", (KeyCode.SELECT_MULTI, None)),
+        (f"Press {multi_select_modifier_string}+\u2192", (KeyCode.SELECT_MULTI, None)),
         ("Press backspace \u232b",   (KeyCode.DELETE_CHAR, None)),
         ("Press lowercase a",        (KeyCode.SEARCHABLE, 'a')),
         ("Press uppercase A",        (KeyCode.SEARCHABLE, 'A')),
@@ -36,13 +36,15 @@ def test_keys():
 
 def explore():
     print("Start pressing keys to see what values are read!")
+    print(f"{ANSI_YELLOW}ctl+c to exit{ANSI_RESET}")
     while True:
         key_press = readKeyPress()
         if key_press == SPECIAL_KEY:
             key_press = (key_press, readKeyPress())
-        print(f"Key pressed: {key_press}")
         if key_press == CTL_C:
+            print(f"Key pressed: {key_press} {ANSI_RED}(exit){ANSI_RESET}")
             break
+        print(f"Key pressed: {key_press}")
 
 arg_parser = argparse.ArgumentParser(description="Interactive testing.")
 sub_parsers = arg_parser.add_subparsers(required=True)
