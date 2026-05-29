@@ -13,7 +13,7 @@ def test_keys():
         ("Press right arrow \u2192", (None, None)),
         ("Press left arrow \u2190",  (None, None)),
         ("Press enter \u21B5",       (KeyCode.SELECT, None)),
-        (f"Press {multi_select_modifier_string}+right", (KeyCode.SELECT_MULTI, None)),
+        (f"Press {multi_select_modifier_string}+\u2192", (KeyCode.SELECT_MULTI, None)),
         ("Press backspace \u232b",   (KeyCode.DELETE_CHAR, None)),
         ("Press lowercase a",        (KeyCode.SEARCHABLE, 'a')),
         ("Press uppercase A",        (KeyCode.SEARCHABLE, 'A')),
